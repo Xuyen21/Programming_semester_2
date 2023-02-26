@@ -1,0 +1,10 @@
+# Folders
+bin/
+include/
+lib/
+pyvenv.cfg
+.vscode/
+
+# Files
+*.xml
+*.dtd

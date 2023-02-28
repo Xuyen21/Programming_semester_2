@@ -16,7 +16,9 @@ duplicates: list[str] = [
     "crossref",
     "isbn",
     "pages",
-    "year"
+    "year",
+    "title",
+    "series"
 ]
 
 types: list[str] = [
@@ -71,23 +73,34 @@ for event, element in etree.iterparse('dblp.xml', dtd_validation=True):
 
         # print("-" * 75)
 
-        columns: list[str] = []
-        values: list[sql.Literal] = []
+        columns = ['entry_id']
+        values = []
 
         for c in non_duplicate:
             columns.append(c.tag)
             values.append(c.text)
 
-        # add to according table
-        INSERT_PAPER = sql.SQL('INSERT INTO {table} (entry_id, {column}) VALUES ({id}, {value})').format(
-            table = sql.Identifier(element.tag),
-            id = sql.SQL('(SELECT MAX(id) FROM entry)'),
-            column = sql.SQL(', '.join(columns)),
-            value = sql.SQL(",").join(map(sql.Literal, values))
-        )
+        if len(values) != 0:
+            # add to according table
+            INSERT_PAPER = sql.SQL('INSERT INTO {table} ({column}) VALUES ({id}, {value})').format(
+                table = sql.Identifier(element.tag),
+                column = sql.SQL(', '.join(columns)),
+                id = sql.SQL('(SELECT MAX(id) FROM entry)'),
+                value = sql.SQL(",").join(map(sql.Literal, values))
+            )
 
-        cursor.execute(INSERT_PAPER)
-        conn.commit()
+            cursor.execute(INSERT_PAPER)
+            conn.commit()
+        else:
+            # add to according table
+            INSERT_PAPER = sql.SQL('INSERT INTO {table} ({column}) VALUES ({id})').format(
+                table = sql.Identifier(element.tag),
+                column = sql.SQL(', '.join(columns)),
+                id = sql.SQL('(SELECT MAX(id) FROM entry)')
+            )
+
+            cursor.execute(INSERT_PAPER)
+            conn.commit()
 
         element.clear()
         # break

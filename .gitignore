@@ -4,6 +4,7 @@ include/
 lib/
 pyvenv.cfg
 .vscode/
+__pycache__/
 
 # Files
 *.xml

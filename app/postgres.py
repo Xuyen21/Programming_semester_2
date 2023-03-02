@@ -3,8 +3,8 @@ import psycopg2
 conn = psycopg2.connect(
     database="Dashboard",
     host="localhost",
-    user="postgres",
-    password="festo",
+    user="",
+    password="",
     port="5432"
 )
 

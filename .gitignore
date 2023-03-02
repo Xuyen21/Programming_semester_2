@@ -10,3 +10,4 @@ __pycache__/
 *.xml
 *.dtd
 .DS_Store
+*.env

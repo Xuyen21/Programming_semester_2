@@ -5,6 +5,12 @@ This file gives an overview of the dblp PostgreSQL database.
 
 ## Code Snippets
 
+### reset identity
+
+```SQL
+ALTER SEQUENCE entry_id_seq RESTART WITH 1
+```
+
 ### entry
 
 ```SQL
@@ -21,32 +27,194 @@ CREATE TABLE entry(
 ### phdthesis
 
 ```SQL
-DROP TABLE IF EXISTS phdthesis;
+DROP TABLE IF EXISTS phdthesis CASCADE;
 
 CREATE TABLE phdthesis (
     id BIGINT GENERATED ALWAYS AS IDENTITY,
     entry_id BIGINT NOT NULL,
-    title VARCHAR,
-    year INT,
-    month INT,
-    publisher VARCHAR,
-    number INT,
-    pages INT,
-    isbn VARCHAR,
-    series VARCHAR,
-    volume INT,
-    note VARCHAR,
+    month VARCHAR,
+    number VARCHAR,
+    volume VARCHAR,
     PRIMARY KEY (id),
     CONSTRAINT fk_entry
         FOREIGN KEY(entry_id) 
         REFERENCES entry(id)
+        ON DELETE CASCADE
 );
 ```
+
+### article
+
+```SQL
+DROP TABLE IF EXISTS article CASCADE;
+
+CREATE TABLE article (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    entry_id BIGINT NOT NULL,
+    journal VARCHAR,
+    number VARCHAR,
+    volume VARCHAR,
+    month VARCHAR,
+    booktitle VARCHAR,
+    publnr VARCHAR,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id) 
+        REFERENCES entry(id)
+        ON DELETE CASCADE
+);
+```
+
+### book
+
+```SQL
+DROP TABLE IF EXISTS book CASCADE;
+
+CREATE TABLE book (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    entry_id BIGINT NOT NULL,
+    volume VARCHAR,
+    booktitle VARCHAR,
+    month VARCHAR,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id) 
+        REFERENCES entry(id)
+        ON DELETE CASCADE
+);
+```
+
+### mastersthesis
+
+```SQL
+DROP TABLE IF EXISTS mastersthesis CASCADE;
+
+CREATE TABLE mastersthesis (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    entry_id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id) 
+        REFERENCES entry(id)
+        ON DELETE CASCADE
+);
+```
+
+### incollection
+
+```SQL
+DROP TABLE IF EXISTS incollection CASCADE;
+
+CREATE TABLE incollection (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    entry_id BIGINT NOT NULL,
+    booktitle VARCHAR,
+    number VARCHAR,
+    chapter VARCHAR,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id) 
+        REFERENCES entry(id)
+        ON DELETE CASCADE
+);
+```
+
+### proceedings
+
+```SQL
+DROP TABLE IF EXISTS proceedings CASCADE;
+
+CREATE TABLE proceedings (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    entry_id BIGINT NOT NULL,
+    booktitle VARCHAR,
+    volume VARCHAR,
+    number VARCHAR,
+    address VARCHAR,
+    journal VARCHAR,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id) 
+        REFERENCES entry(id)
+        ON DELETE CASCADE
+);
+```
+
+### www
+
+```SQL
+DROP TABLE IF EXISTS www CASCADE;
+
+CREATE TABLE www (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    entry_id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id) 
+        REFERENCES entry(id)
+        ON DELETE CASCADE
+);
+```
+
+### inproceedings
+
+```SQL
+DROP TABLE IF EXISTS inproceedings CASCADE;
+
+CREATE TABLE inproceedings (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    entry_id BIGINT NOT NULL,
+    booktitle VARCHAR,
+    number VARCHAR,
+    volume VARCHAR,
+    month VARCHAR,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id) 
+        REFERENCES entry(id)
+        ON DELETE CASCADE
+);
+```
+
+### data
+
+```SQL
+DROP TABLE IF EXISTS data CASCADE;
+
+CREATE TABLE data (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    entry_id BIGINT NOT NULL,
+    month VARCHAR,
+    number VARCHAR,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id) 
+        REFERENCES entry(id)
+        ON DELETE CASCADE
+);
+```
+
+## Multiple Instances
+
++ author
++ ee
++ isbn
++ note
++ pages
++ publisher
++ school
++ cdrom
++ cite
++ editor
++ url
++ crossref
++ year
++ series
 
 ### author
 
 ```SQL
-DROP TABLE IF EXISTS author;
+DROP TABLE IF EXISTS author CASCADE;
 
 CREATE TABLE author (
     id BIGINT GENERATED ALWAYS AS IDENTITY,
@@ -58,7 +226,7 @@ CREATE TABLE author (
 ### entry_author
 
 ```SQL
-DROP TABLE IF EXISTS entry_author;
+DROP TABLE IF EXISTS entry_author CASCADE;
 
 CREATE TABLE entry_author (
     id BIGINT GENERATED ALWAYS AS IDENTITY,
@@ -66,22 +234,90 @@ CREATE TABLE entry_author (
     entry_id BIGINT,
     PRIMARY KEY (id),
     CONSTRAINT fk_entry
-        FOREIGN KEY(entry_id) 
-        REFERENCES entry(id),
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
     CONSTRAINT fk_author
         FOREIGN key(author_id)
         REFERENCES author(id)
+        ON DELETE CASCADE
+);
+```
+
+### school
+
+```SQL
+DROP TABLE IF EXISTS school CASCADE;
+
+CREATE TABLE school (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY (id)
+);
+```
+
+### entry_school
+
+```SQL
+DROP TABLE IF EXISTS entry_school CASCADE;
+
+CREATE TABLE entry_school (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    school_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_school
+        FOREIGN key(school_id)
+        REFERENCES school(id)
+        ON DELETE CASCADE
+);
+```
+
+### publisher
+
+```SQL
+DROP TABLE IF EXISTS publisher CASCADE;
+
+CREATE TABLE publisher (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY (id)
+);
+```
+
+### entry_publisher
+
+```SQL
+DROP TABLE IF EXISTS entry_publisher CASCADE;
+
+CREATE TABLE entry_publisher (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    publisher_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_publisher
+        FOREIGN key(publisher_id)
+        REFERENCES publisher(id)
+        ON DELETE CASCADE
 );
 ```
 
 ### ee
 
 ```SQL
-DROP TABLE IF EXISTS ee;
+DROP TABLE IF EXISTS ee CASCADE;
 
 CREATE TABLE ee (
     id BIGINT GENERATED ALWAYS AS IDENTITY,
-    url VARCHAR,
+    name VARCHAR,
     PRIMARY KEY(id)
 );
 ```
@@ -89,7 +325,7 @@ CREATE TABLE ee (
 ### entry_ee
 
 ```SQL
-DROP TABLE IF EXISTS entry_ee;
+DROP TABLE IF EXISTS entry_ee CASCADE;
 
 CREATE TABLE entry_ee (
     id BIGINT GENERATED ALWAYS AS IDENTITY,
@@ -97,301 +333,375 @@ CREATE TABLE entry_ee (
     entry_id BIGINT,
     PRIMARY KEY (id),
     CONSTRAINT fk_entry
-        FOREIGN KEY(entry_id) 
-        REFERENCES entry(id),
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
     CONSTRAINT fk_ee
         FOREIGN key(ee_id)
         REFERENCES ee(id)
+        ON DELETE CASCADE
 );
 ```
 
+### note
 
+```SQL
+DROP TABLE IF EXISTS note CASCADE;
 
-## Multiple Instances
+CREATE TABLE note (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY(id)
+);
+```
 
-+ cdrom: `str`
-+ cite: `str`
-+ publisher: `str`
-+ author: `str` => Done
-+ note: `str`
-+ school: `str` => Done
-+ editor: `str` => Done
-+ url: `str` or `url` => Done
-+ ee: `str` or `url` => Done
-+ crossref: `str` or `url` => Done
+### entry_note
 
-## ERD
+```SQL
+DROP TABLE IF EXISTS entry_note CASCADE;
 
-```mermaid
----
-title: Database Overview
----
-erDiagram
+CREATE TABLE entry_note (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    note_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_note
+        FOREIGN key(note_id)
+        REFERENCES note(id)
+        ON DELETE CASCADE
+);
+```
 
-    entry ||--|| phdthesis: is
-    entry ||--|| article: is
-    entry ||--|| book: is
-    entry ||--|| mastersthesis: is
-    entry ||--|| incollection: is
-    entry ||--|| proceedings: is
-    entry ||--|| www: is
-    entry ||--|| inproceedings: is
+### isbn
 
-    article }o--|| entry_author: has
-    phdthesis }o--|| entry_author: has
-    book }o--|| entry_author: has
-    mastersthesis }o--|| entry_author: has
-    incollection }o--|| entry_author: has
-    proceedings }o--|| entry_author: has
-    www }o--|| entry_author: has
-    inproceedings }o--|| entry_author: has
+```SQL
+DROP TABLE IF EXISTS isbn CASCADE;
 
-    entry_author ||--o{ author: has
+CREATE TABLE isbn (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY(id)
+);
+```
 
-    phdthesis }o--|| entry_school: "made by"
-    book }o--|| entry_school: "made by"
-    mastersthesis }o--|| entry_school: "made by"
-    proceedings }o--|| entry_school: "made by"
+### entry_isbn
 
-    entry_school ||--o{ school: has
+```SQL
+DROP TABLE IF EXISTS entry_isbn CASCADE;
 
-    article }o--|| entry_editor: has
-    book }o--|| entry_editor: has
-    proceedings }o--|| entry_editor: has
-    www }o--|| entry_editor: has
-    inproceedings }o--|| entry_editor: has
+CREATE TABLE entry_isbn (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    isbn_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_isbn
+        FOREIGN key(isbn_id)
+        REFERENCES isbn(id)
+        ON DELETE CASCADE
+);
+```
 
-    entry_editor ||--o{ editor: has
+### pages
 
-    article }o--|| entry_url: has
-    book }o--|| entry_url: has
-    incollection }o--|| entry_url: has
-    proceedings }o--|| entry_url: has
-    www }o--|| entry_url: has
-    inproceedings }o--|| entry_url: has
+```SQL
+DROP TABLE IF EXISTS pages CASCADE;
 
-    entry_url ||--o{ url: has
+CREATE TABLE pages (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY(id)
+);
+```
 
-    article }o--|| entry_ee: has
-    phdthesis }o--|| entry_ee: has
-    book }o--|| entry_ee: has
-    mastersthesis }o--|| entry_ee: has
-    incollection }o--|| entry_ee: has
-    proceedings }o--|| entry_ee: has
-    www }o--|| entry_ee: has
-    inproceedings }o--|| entry_ee: has
+### entry_pages
 
-    entry_ee ||--o{ ee: has
+```SQL
+DROP TABLE IF EXISTS entry_pages CASCADE;
 
-    article }o--|| entry_crossref: has
-    book }o--|| entry_crossref: has
-    incollection }o--|| entry_crossref: has
-    www }o--|| entry_crossref: has
-    inproceedings }o--|| entry_crossref: has
+CREATE TABLE entry_pages (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    pages_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_pages
+        FOREIGN key(pages_id)
+        REFERENCES pages(id)
+        ON DELETE CASCADE
+);
+```
 
-    entry_crossref ||--o{ crossref: has
+### cdrom
 
-    entry {
-        bigint id PK
-        date publish_date
-    }
+```SQL
+DROP TABLE IF EXISTS cdrom CASCADE;
 
-    article {
-        bigint entry_id FK
-        int pages
-        int year
-        string journal
-        int number
-        string url
-        int volume
-        string drossref
-        int month
-        char note
-        char cdrom
-        char editor
-        char cite
-        char booktitle
-        int publnr
-        int publisher
-        char ee
-    }
+CREATE TABLE cdrom (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY(id)
+);
+```
 
-    phdthesis {
-        bigint entry_id FK
-        char title
-        int year
-        char publisher
-        int number
-        int pages
-        str isbn
-        int month
-        char series
-        int volume
-        char note
-    }
+### entry_cdrom
 
-    book {
-        bigint entry_id FK
-        char title
-        char school
-        int year
-        char publisher
-        char series
-        char volume
-        char isbn
-        char ee
-        int pages
-        char note
-        char editor
-        char booktitle
-        char url
-        char crossref
-        int month
-        char cite
-        char cdrom
-    }
+```SQL
+DROP TABLE IF EXISTS entry_cdrom CASCADE;
 
-    mastersthesis {
-        bigint entry_id FK
-        char title
-        int year
-        char school
-        char ee
-        char note
-    }
+CREATE TABLE entry_cdrom (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    cdrom_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_cdrom
+        FOREIGN key(cdrom_id)
+        REFERENCES cdrom(id)
+        ON DELETE CASCADE
+);
+```
 
-    incollection {
-        bigint entry_id FK
-        char title
-        int pages
-        int year
-        char booktitle
-        char ee
-        char crossref
-        char url
-        char cite
-        char publisher
-        int number
-        char note
-        char drom
-        char chapter
-    }
+### cite
 
-    proceedings {
-        bigint entry_id FK
-        char editor
-        char title
-        char publisher
-        int year
-        char sibn
-        char ee
-        char url
-        char booktitle
-        char series
-        char volume
-        int volume
-        int number
-        char note
-        char pages
-        char school
-        char address
-        char journal
-        char cite
-    }
+```SQL
+DROP TABLE IF EXISTS cite CASCADE;
 
-    www {
-        bigint entry_id FK
-        char title
-        char url
-        char note
-        char crossref
-        char cite
-        char ee
-        int year
-        char editor
-    }
+CREATE TABLE cite (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY(id)
+);
+```
 
-    inproceedings {
-        bigint entry_id FK
-        char title
-        char booktitle
-        char year
-        char url
-        char crossref
-        char ee
-        char pages
-        char cite
-        char cdrom
-        char note
-        char editor
-        int number
-        int volume
-        int month
-    }
+### entry_cite
 
-    entry_author {
-        bigint id PK
-        bigint author_id FK
-        bigint entry_id FK
-    }
+```SQL
+DROP TABLE IF EXISTS entry_cite CASCADE;
 
-    author {
-        bigint id PK
-        char name
-    }
+CREATE TABLE entry_cite (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    cite_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_cite
+        FOREIGN key(cite_id)
+        REFERENCES cite(id)
+        ON DELETE CASCADE
+);
+```
 
-    entry_school {
-        bigint id PK
-        bigint school_id FK
-        bigint entry_id FK
-    }
+### editor
 
-    school {
-        bigint id PK
-        char name
-    }
+```SQL
+DROP TABLE IF EXISTS editor CASCADE;
 
-    entry_editor {
-        bigint id PK
-        bigint editor_id FK
-        bigint entry_id FK
-    }
+CREATE TABLE editor (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY(id)
+);
+```
 
-    editor {
-        bigint id PK
-        char name
-    }
+### entry_editor
 
-    entry_url {
-        bigint id PK
-        bigint url_id FK
-        bigint entry_id FK
-    }
+```SQL
+DROP TABLE IF EXISTS entry_editor CASCADE;
 
-    url {
-        bigint id PK
-        char url
-    }
+CREATE TABLE entry_editor (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    editor_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_editor
+        FOREIGN key(editor_id)
+        REFERENCES editor(id)
+        ON DELETE CASCADE
+);
+```
 
-    entry_ee {
-        bigint id PK
-        bigint ee_id FK
-        bigint entry_id FK
-    }
+### url
 
-    ee {
-        bigint id PK
-        char url
-    }
+```SQL
+DROP TABLE IF EXISTS url CASCADE;
 
-    entry_crossref {
-        bigint id PK
-        bigint crossref_id FK
-        bigint entry_id FK
-    }
+CREATE TABLE url (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY(id)
+);
+```
 
-    crossref {
-        bigint id PK
-        char url
-    }
+### entry_url
+
+```SQL
+DROP TABLE IF EXISTS entry_url CASCADE;
+
+CREATE TABLE entry_url (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    url_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_url
+        FOREIGN key(url_id)
+        REFERENCES url(id)
+        ON DELETE CASCADE
+);
+```
+
+### crossref
+
+```SQL
+DROP TABLE IF EXISTS crossref CASCADE;
+
+CREATE TABLE crossref (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY(id)
+);
+```
+
+### entry_crossref
+
+```SQL
+DROP TABLE IF EXISTS entry_crossref CASCADE;
+
+CREATE TABLE entry_crossref (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    crossref_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_crossref
+        FOREIGN key(crossref_id)
+        REFERENCES crossref(id)
+        ON DELETE CASCADE
+);
+```
+
+### year
+
+```SQL
+DROP TABLE IF EXISTS year CASCADE;
+
+CREATE TABLE year (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name INT,
+    PRIMARY KEY(id)
+);
+```
+
+### entry_year
+
+```SQL
+DROP TABLE IF EXISTS entry_year CASCADE;
+
+CREATE TABLE entry_year (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    year_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_year
+        FOREIGN key(year_id)
+        REFERENCES year(id)
+        ON DELETE CASCADE
+);
+```
+
+### title
+
+```SQL
+DROP TABLE IF EXISTS title CASCADE;
+
+CREATE TABLE title (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY(id)
+);
+```
+
+### entry title
+
+```SQL
+DROP TABLE IF EXISTS entry_title CASCADE;
+
+CREATE TABLE entry_title (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    title_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_title
+        FOREIGN key(title_id)
+        REFERENCES title(id)
+        ON DELETE CASCADE
+);
+```
+
+### series
+
+```SQL
+DROP TABLE IF EXISTS series CASCADE;
+
+CREATE TABLE series (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR,
+    PRIMARY KEY(id)
+);
+```
+
+### entry_series
+
+```SQL
+DROP TABLE IF EXISTS entry_series CASCADE;
+
+CREATE TABLE entry_series (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    series_id BIGINT,
+    entry_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_entry
+        FOREIGN KEY(entry_id)
+        REFERENCES entry(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_series
+        FOREIGN key(series_id)
+        REFERENCES series(id)
+        ON DELETE CASCADE
+);
 ```

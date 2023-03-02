@@ -9,3 +9,4 @@ __pycache__/
 # Files
 *.xml
 *.dtd
+.DS_Store

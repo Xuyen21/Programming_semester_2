@@ -47,8 +47,6 @@ for event, element in etree.iterparse('dblp.xml', dtd_validation=True):
         # go trough all childs
         for child in element:
 
-            # print(f'{child.tag}: {child.text}')
-
             # if child is duplicate => put in duplicate table
             if child.tag in duplicates:
 
@@ -70,8 +68,6 @@ for event, element in etree.iterparse('dblp.xml', dtd_validation=True):
                 conn.commit()
             else:
                 non_duplicate.append(child)
-
-        # print("-" * 75)
 
         columns = ['entry_id']
         values = []
@@ -103,4 +99,3 @@ for event, element in etree.iterparse('dblp.xml', dtd_validation=True):
             conn.commit()
 
         element.clear()
-        # break

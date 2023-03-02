@@ -11,6 +11,6 @@ conn = psycopg2.connect(
 if __name__ == "__main__":
     cursor = conn.cursor()
 
-    cursor.execute("SELECT title, author FROM view_article")
+    cursor.execute("SELECT COUNT(id) FROM entry")
 
     print(cursor.fetchone())

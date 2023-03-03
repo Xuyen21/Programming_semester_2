@@ -1,9 +1,16 @@
+"""
+Postgres Connector
+Description: This module is resposible for the connection to the postgres database.
+Created: 3.3.2023
+"""
 import os
 import psycopg2
 from dotenv import load_dotenv
 
+# load environments from .env file
 load_dotenv()
 
+# postgress connection
 conn = psycopg2.connect(
     database="Dashboard",
     host="localhost",

@@ -12,10 +12,10 @@ load_dotenv()
 
 # postgress connection
 conn = psycopg2.connect(
-    database="Dashboard",
-    host="localhost",
-    user=os.getenv('POSTGRES_USER'),
-    password=os.getenv('POSTGRES_PASSWORD'),
+    database = "Dashboard",
+    host = "localhost",
+    user = os.getenv('POSTGRES_USER'),
+    password = os.getenv('POSTGRES_PASSWORD'),
     port="5432"
 )
 

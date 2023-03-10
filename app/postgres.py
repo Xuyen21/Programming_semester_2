@@ -24,7 +24,7 @@ conn = connect(
 # initialize database cursor
 cursor = conn.cursor()
 
-def sqlFromDropdown(select: list[str], table: str, group_by: str, order_by: str, order: bool = False, limit: int = 10) -> list[tuple]:
+def sql_from_dropdown(select: list[str], table: str, group_by: str, order_by: str, order: bool = False, limit: int = 10) -> list[tuple]:
     """
     This function gets the parameters provided by the dashboard, converts it to a sql query
     and returns the result as a list of tuples.

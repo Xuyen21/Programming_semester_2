@@ -6,6 +6,7 @@ Changelog:
 - 10.03.2023: Added sqlFromDropdown function
 """
 import os
+from time import time
 from psycopg2 import connect, sql
 from dotenv import load_dotenv
 
@@ -56,9 +57,49 @@ def sql_from_dropdown(select: list[str], table: str, group_by: str, order_by: st
     # return results
     return cursor.fetchall()
 
-if __name__ == "__main__":
-    # expected Dashboard input
-    retData = sqlFromDropdown(["name", "COUNT(id)"], "author", "name", "COUNT(id)")
+def table_column_names(table: str) -> list[tuple]:
+    """
+    This function gets the column names of the specified table.
 
-    for value in retData:
+    Parameters:
+    - table: str => the table to get the columns from
+
+    Return:
+    - list[tuples] => the result of the query as list of tuples
+    """
+    # generate sql query
+    sql_query = sql.SQL('SELECT "table_name", "column_name" FROM information_schema."columns" WHERE "table_schema" = {schema} AND "table_name" = {table};').format(
+        schema = sql.Literal('public'),
+        table = sql.Literal(table)
+    )
+
+    # execute query
+    cursor.execute(sql_query)
+
+    # return results
+    return cursor.fetchall()
+
+if __name__ == "__main__":
+    # simulate expected dashboard input
+
+    # test sql_from_dropdown
+    t1 = time()
+    grouped = sql_from_dropdown(["name", "COUNT(id)"], "author", "name", "COUNT(id)")
+    t2 = time()
+
+    for value in grouped:
         print(value)
+
+    print(f'Query took: {t2 - t1:.3} seconds')
+
+    print("-" * 50)
+
+    # test table_column_names
+    t1 = time()
+    columns = table_column_names("entry")
+    t2 = time()
+
+    for value in columns:
+        print(value)
+
+    print(f'Query took: {t2 - t1:.3} seconds')

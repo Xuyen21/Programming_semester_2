@@ -3,11 +3,14 @@ bin/
 include/
 lib/
 pyvenv.cfg
-.vscode/
 __pycache__/
+.vscode/
+.pytest_cache/
+.venv/
 
 # Files
 *.xml
 *.dtd
 .DS_Store
 *.env
+.coverage

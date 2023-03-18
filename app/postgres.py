@@ -2,8 +2,6 @@
 Postgres Connector
 Description: This module is resposible for the connection to the postgres database.
 Created: 3.3.2023
-Changelog:
-- 10.03.2023: Added sqlFromDropdown function
 """
 import os
 from time import time
@@ -41,6 +39,26 @@ def sql_from_dropdown(select: list[str], table: str, group_by: str, order_by: st
     Return:
     - list[tuples] => the result of the query as list of tuples
     """
+
+    # check types
+    if not isinstance(select, (list, str)):
+        raise TypeError("select must be of type: list[str]")
+
+    if not isinstance(table, str):
+        raise TypeError("table must be of type: str")
+
+    if not isinstance(group_by, str):
+        raise TypeError("group_by must be of type: str")
+
+    if not isinstance(order_by, str):
+        raise TypeError("order_by must be of type: str")
+
+    if not isinstance(order, bool):
+        raise TypeError("order must be of type: bool")
+
+    if not isinstance(limit, int):
+        raise TypeError("limit must be of type: int")
+
     # generate sql query
     sql_query = sql.SQL('SELECT {select} FROM {table} GROUP BY {group_by} ORDER BY {order_by} {order} LIMIT {limit}').format(
         select = sql.SQL(",").join(map(sql.SQL, select)),
@@ -67,6 +85,10 @@ def table_column_names(table: str) -> list[tuple]:
     Return:
     - list[tuples] => the result of the query as list of tuples
     """
+    # check type
+    if not isinstance(table, str):
+        raise TypeError("Table is not a str")
+
     # generate sql query
     sql_query = sql.SQL('SELECT "table_name", "column_name" FROM information_schema."columns" WHERE "table_schema" = {schema} AND "table_name" = {table};').format(
         schema = sql.Literal('public'),

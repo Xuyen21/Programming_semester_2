@@ -15,7 +15,7 @@ from lxml import etree
 load_dotenv()
 
 # define worker amount
-WORKERS: int = 5
+WORKERS: int = 6
 
 duplicates: list[str] = [
     "cdrom",
@@ -170,6 +170,16 @@ def insert(queue: Queue):
         try:
             cursor.execute(query)
         except errors.InvalidColumnReference as error:
+            print(error)
+            print(query)
+            print("-" * 75)
+        except errors.DeadlockDetected as error:
+            print(error)
+            print(query)
+            print("-" * 75)
+            # failed to insert try again
+            queue.put(query)
+        except errors.UndefinedColumn as error:
             print(error)
             print(query)
             print("-" * 75)

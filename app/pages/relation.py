@@ -1,3 +1,9 @@
+"""
+This module is responsible for the relations tab of the DBLP Dashboard.
+
+Created by: Silvan Wiedmer
+Created at: 1.5.2023
+"""
 import visdcc
 import pandas as pd
 from itertools import combinations

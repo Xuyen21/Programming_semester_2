@@ -1,46 +1,102 @@
-# from app.layouts.layout import create_layout
+import logging
+import pandas as pd
+import plotly.express as px
+from dash import dcc, Dash, html, Input, Output, dash
+import dash_bootstrap_components as dbc
 from dash_bootstrap_components.themes import BOOTSTRAP
 
-# from .layouts.distribution_diagram import generate_pie_chart
-from dash import Dash, html
-import dash_bootstrap_components as dbc
-from layouts.filter_card import generate_filter_card
+from components.navbar import navbar
 
-from layouts.search_card import search_card
-from layouts.info_display_card import info_display_card
+from modules.postgres import sql_from_dropdown, papers_per_week
 
-search_filter_cards = html.Div([
-    dbc.Row(search_card),
-    html.Hr(),
-    dbc.Row(generate_filter_card())
+from pages.aggregation import aggregation_tab
+from pages.relation import relation_tab, generate_network_relations
+from pages.timespan import timespan_tab
+
+# logging configuration
+logging.basicConfig(
+    format='%(levelname)s : [%(filename)s:%(lineno)d] : %(message)s',
+    level=logging.DEBUG
+)
+logging.getLogger(__name__)
+
+app_layout = dcc.Tabs([
+    aggregation_tab,
+    relation_tab,
+    timespan_tab
 ])
 
-app_layout = dbc.Row(
-    [
-        dbc.Col(search_filter_cards, width=3),
-        dbc.Col(info_display_card, width=7)
-    ]
-)
-
-
-def create_layout(app: Dash) -> html.Div:
+def create_layout() -> html.Div:
     return html.Div(
         className="app-div",
         children=[
-            html.H1(app.title),
-            html.Hr(),
-            app_layout,
-
-        ],
+            navbar,
+            app_layout
+        ]
     )
 
+app = Dash(
+    name = "DBLP Dashboard",
+    title = "Welcome to DBLP",
+    external_stylesheets=[BOOTSTRAP]
+)
+app.layout = create_layout()
 
-def main():
-    app = Dash(external_stylesheets=[BOOTSTRAP])
-    app.title = 'WELCOME TO DBLP'
-    app.layout = create_layout(app)
-    app.run(debug=True)
+# aggregation callback
+@app.callback(
+    Output("aggregation_chart", "figure"),
+    Input("tabelle_dropdown", "value")
+)
+def draw_aggregation(selected_table: str):
 
+    if not selected_table:
+        selected_table = "publisher"
+
+    selected_columns: list[str] = [f'{selected_table}.name', 'sub_col.count']
+
+    values = sql_from_dropdown(selected_columns, selected_table, "name", f'COUNT({selected_table}_{"id"})')
+
+    selected_columns: list[str] = ['name','count']
+
+    df = pd.DataFrame(values, columns=selected_columns)
+
+    df = df.sort_values(by=[selected_columns[1]], ascending=True)
+
+    fig = px.bar(df, x=selected_columns[0], y=selected_columns[1])
+
+    return fig
+
+# relation callback
+@app.callback(
+    Output("relation_network", "data"),
+    Input("relation_dropdown", "value"),
+)
+def draw_relation_network(table: str):
+    if table is None:
+        return dash.no_update
+
+    return generate_network_relations()
+
+# timespan callback
+@app.callback(
+    Output("timespan_chart", "figure"),
+    Input("year_dropdown", "value")
+)
+def draw_timespan(selected_year: str):
+    if not selected_year:
+        selected_year = "2022"
+
+    values = papers_per_week(selected_year)
+
+    selected_columns: list[str] = ['Calendar week','count']
+
+    df = pd.DataFrame(values, columns=selected_columns)
+
+    df = df.sort_values(by=[selected_columns[1]], ascending=True)
+
+    fig = px.bar(df, x=selected_columns[0], y=selected_columns[1])
+
+    return fig
 
 if __name__ == '__main__':
-    main()
+    app.run(debug=True)

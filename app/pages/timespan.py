@@ -6,7 +6,7 @@ from components.filter_card import generate_filter_card
 from components.info_card import info_card
 
 # define form
-aggregation_form = html.Div([
+timespan_form = html.Div([
     dbc.Row([
         dbc.Label("Tabelle"),
         dcc.Dropdown(
@@ -18,17 +18,17 @@ aggregation_form = html.Div([
 ])
 
 # define chart
-aggregation_chart = dcc.Graph(id="aggregation_chart")
+timespan_chart = dcc.Graph(id="timespan_chart")
 
 # define aggregation tab
-aggregation_tab = dcc.Tab(label = "Aggregation", children = [
+timespan_tab = dcc.Tab(label = "Timespan", children = [
     dbc.Row([
         dbc.Col([
-            generate_filter_card(aggregation_form), 
+            generate_filter_card(timespan_form), 
             info_card
         ], width=2),
         dbc.Col(dbc.Card(
-            dbc.CardBody(aggregation_chart)
+            dbc.CardBody(timespan_chart)
         ), width=6)
     ])
 ])

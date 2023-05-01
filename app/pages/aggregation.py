@@ -10,7 +10,7 @@ aggregation_form = html.Div([
     dbc.Row([
         dbc.Label("Tabelle"),
         dcc.Dropdown(
-            ["author", "editor", "pages", "publisher", "school", "year"],
+            ["author", "editor", "pages", "publisher", "school"],
             placeholder="Tabelle auswählen",
             id = "tabelle_dropdown"
         )

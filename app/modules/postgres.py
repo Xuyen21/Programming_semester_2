@@ -159,31 +159,38 @@ def author_relations() -> list[tuple]:
     # return results
     return cursor.fetchall()
 
-if __name__ == "__main__":
-    # simulate expected dashboard input
-    """
-    # test sql_from_dropdown
-    t1 = time()
-    grouped = sql_from_dropdown(["name", "COUNT(id)"], "author", "name", "COUNT(id)")
-    t2 = time()
-    for value in grouped:
-        print(value)
-    print(f'Query took: {t2 - t1:.3} seconds')
-    print("-" * 50)
-    # test table_column_names
-    t1 = time()
-    columns = table_column_names("entry")
-    t2 = time()
-    for value in columns:
-        print(value)
-    print(f'Query took: {t2 - t1:.3} seconds')
-    """
-    # test relations
-    t1 = time()
-    columns = relations()
-    t2 = time()
+def papers_per_week(year: str) -> list[tuple]:
+    sub_query = sql.SQL("""
+    (
+        SELECT key, mdate, DATE_PART('week',mdate) as week_number
+        FROM entry
+        WHERE EXTRACT(YEAR FROM mdate) = {year}
+        ORDER BY week_number DESC 
+    ) AS sub_col
+    """).format(
+        year = sql.Literal(year)
+    )
 
-    for value in columns:
-        print(value)
+    # generate sql query
+    sql_query = sql.SQL("""
+        SELECT week_number, COUNT(key)
+        FROM {sub_query}
+        GROUP BY week_number
+        ORDER BY week_number"""
+    ).format(
+        sub_query = sub_query
+    )
 
-    print(f'Query took: {t2 - t1:.3} seconds')
+    # execute query
+    try:
+        t1 = time()
+        cursor.execute(sql_query)
+        t2 = time()
+        logging.debug(f'Query took: {t2 - t1:.3} seconds')
+    except errors.SyntaxError as err:
+        logging.warning(err)
+    except Exception as err:
+        logging.error(err)
+
+    # return results
+    return cursor.fetchall()

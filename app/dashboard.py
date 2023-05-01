@@ -7,7 +7,7 @@ from dash_bootstrap_components.themes import BOOTSTRAP
 
 from components.navbar import navbar
 
-from modules.postgres import sql_from_dropdown
+from modules.postgres import sql_from_dropdown, papers_per_week
 
 from pages.aggregation import aggregation_tab
 from pages.relation import relation_tab, generate_network_relations
@@ -80,9 +80,23 @@ def draw_relation_network(table: str):
 # timespan callback
 @app.callback(
     Output("timespan_chart", "figure"),
-    Input("tabelle_dropdown", "value")
+    Input("year_dropdown", "value")
 )
-def draw_timespan():
+def draw_timespan(selected_year: str):
+    if not selected_year:
+        selected_year = "2022"
+
+    values = papers_per_week(selected_year)
+
+    selected_columns: list[str] = ['Calendar week','count']
+
+    df = pd.DataFrame(values, columns=selected_columns)
+
+    df = df.sort_values(by=[selected_columns[1]], ascending=True)
+
+    fig = px.bar(df, x=selected_columns[0], y=selected_columns[1])
+
+    return fig
 
 if __name__ == '__main__':
     app.run(debug=True)

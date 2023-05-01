@@ -7,7 +7,7 @@ import dash_bootstrap_components as dbc
 from modules.postgres import author_relations
 
 from components.filter_card import generate_filter_card
-
+from components.settings_card import generate_settings_card
 from components.info_card import info_card
 
 # define form
@@ -65,7 +65,8 @@ def generate_network_relations():
 relation_tab = dcc.Tab(label = "Relation", children = [
     dbc.Row([
         dbc.Col([
-            generate_filter_card(relation_form), 
+            generate_filter_card(relation_form),
+            generate_settings_card(html.P("Not Implemented")),
             info_card
         ], width=2),
         dbc.Col(dbc.Card(

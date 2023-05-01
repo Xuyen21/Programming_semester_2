@@ -4,14 +4,16 @@ This module is responsible for the relations tab of the DBLP Dashboard.
 Created by: Silvan Wiedmer
 Created at: 1.5.2023
 """
+from itertools import combinations
 import visdcc
 import pandas as pd
-from itertools import combinations
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
+# modules
 from modules.postgres import author_relations
 
+# dashboard components
 from components.filter_card import generate_filter_card
 from components.settings_card import generate_settings_card
 from components.info_card import info_card

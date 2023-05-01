@@ -4,6 +4,8 @@ include/
 lib/
 pyvenv.cfg
 .vscode/
+.pytest_cache/
+.venv/
 __pycache__/
 
 # Files
@@ -12,3 +14,4 @@ __pycache__/
 .DS_Store
 *.env
 environment.py
+.coverage

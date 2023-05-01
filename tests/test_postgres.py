@@ -1,6 +1,6 @@
 import pytest
 from psycopg2 import errors
-from app.postgres import table_column_names, sql_from_dropdown
+from app.modules.postgres import table_column_names, sql_from_dropdown
 
 def test_table_column_names():
     table_column_names("author")

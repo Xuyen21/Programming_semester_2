@@ -31,7 +31,7 @@ def create_layout(app: Dash) -> html.Div:
             html.Hr(),
             app_layout,
 
-        ],
+        ]
     )
 
 

@@ -11,3 +11,4 @@ __pycache__/
 *.dtd
 .DS_Store
 *.env
+environment.py

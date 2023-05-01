@@ -29,7 +29,9 @@ timespan_tab = dcc.Tab(label = "Timespan", children = [
             info_card
         ], width=2),
         dbc.Col(dbc.Card(
-            dbc.CardBody(timespan_chart)
-        ), width=6)
+            dbc.CardBody(dcc.Loading(
+                type = "default",
+                children = timespan_chart))
+        ), width=10)
     ])
 ])

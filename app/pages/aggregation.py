@@ -10,7 +10,7 @@ aggregation_form = html.Div([
     dbc.Row([
         dbc.Label("Tabelle"),
         dcc.Dropdown(
-            ["author", "editor", "pages", "publisher", "school", "year"],
+            ["author", "editor", "pages", "publisher", "school"],
             placeholder="Tabelle auswählen",
             id = "tabelle_dropdown"
         )
@@ -29,7 +29,11 @@ aggregation_tab = dcc.Tab(label = "Aggregation", children = [
             info_card
         ], width=2),
         dbc.Col(dbc.Card(
-            dbc.CardBody(aggregation_chart)
-        ), width=6)
+            dbc.CardBody(dcc.Loading(
+                type = "default",
+                children = aggregation_chart
+            )
+            )
+        ), width=10)
     ])
 ])

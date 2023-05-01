@@ -70,7 +70,10 @@ relation_tab = dcc.Tab(label = "Relation", children = [
             info_card
         ], width=2),
         dbc.Col(dbc.Card(
-            dbc.CardBody(relation_chart)
-        ), width=6)
+            dbc.CardBody(dcc.Loading(
+                type = "default",
+                children = relation_chart)
+            )
+        ), width=10)
     ])
 ])

@@ -75,7 +75,7 @@ def draw_relation_network(table: str):
     if table is None:
         return dash.no_update
 
-    return generate_network_relations()
+    return generate_network_relations(table)
 
 # timespan callback
 @app.callback(

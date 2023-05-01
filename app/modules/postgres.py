@@ -122,17 +122,22 @@ def table_column_names(table: str) -> list[tuple]:
     # return results
     return cursor.fetchall()
 
-def author_relations() -> list[tuple]:
+def author_relations(table: str) -> list[tuple]:
 
     sub_query = sql.SQL("""
     (
-        SELECT phdthesis.entry_key
-        FROM phdthesis
-        LEFT JOIN entry_author ON phdthesis.entry_key = entry_author.entry_key
-        GROUP BY phdthesis.entry_key
+        SELECT {select}
+        FROM {table}
+        LEFT JOIN entry_author ON {on} = entry_author.entry_key
+        GROUP BY {group_by}
         ORDER BY COUNT(entry_author.author_id) DESC
         LIMIT 10
     ) as sub_col"""
+    ).format(
+        select = sql.SQL(f'{table}.entry_key'),
+        table = sql.Identifier(table),
+        group_by = sql.SQL(f'{table}.entry_key'),
+        on = sql.SQL(f'{table}.entry_key')
     )
 
     # generate sql query

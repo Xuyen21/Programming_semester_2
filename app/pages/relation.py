@@ -37,10 +37,14 @@ relation_chart = visdcc.Network(id = 'relation_network',
     }
 )
 
-def generate_network_relations():
-    author_relations_df = pd.DataFrame(author_relations())
+def generate_network_relations() -> dict:
+    """
+    Generate the Relationship graph from the database.
 
-    # print(author_relations_df)
+    Returns:
+    - dict: Relationship graph data
+    """
+    author_relations_df = pd.DataFrame(author_relations())
 
     # generate nodes
     unique_authors = author_relations_df.iloc[:, 1].unique()

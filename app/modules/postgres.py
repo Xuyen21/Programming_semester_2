@@ -14,7 +14,7 @@ load_dotenv()
 
 # postgress connection
 conn = connect(
-    database = "Dashboard_V2",
+    database = os.getenv('DATABASE_NAME'),
     host = "localhost",
     user = os.getenv('POSTGRES_USER'),
     password = os.getenv('POSTGRES_PASSWORD'),

@@ -1,11 +1,19 @@
-import visdcc
-import pandas as pd
+"""
+This module is responsible for the relations tab of the DBLP Dashboard.
+
+Created by: Silvan Wiedmer
+Created at: 1.5.2023
+"""
 from itertools import combinations
+from visdcc import Network
+import pandas as pd
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
+# modules
 from modules.postgres import author_relations
 
+# dashboard components
 from components.filter_card import generate_filter_card
 from components.settings_card import generate_settings_card
 from components.info_card import info_card
@@ -15,7 +23,7 @@ relation_form = html.Div([
     dbc.Row([
         dbc.Label("Tabelle"),
         dcc.Dropdown(
-            ["phdthesis", "mastersthesis"],
+            ["phdthesis", "mastersthesis", "article"],
             value = "phdthesis",
             id = "relation_dropdown"
         )
@@ -23,7 +31,7 @@ relation_form = html.Div([
 ])
 
 # define chart
-relation_chart = visdcc.Network(id = 'relation_network', 
+relation_chart = Network(id = 'relation_network', 
     options = dict(height= '600px', width= '100%'),
     data = {
         'nodes': [],
@@ -31,10 +39,14 @@ relation_chart = visdcc.Network(id = 'relation_network',
     }
 )
 
-def generate_network_relations():
-    author_relations_df = pd.DataFrame(author_relations())
+def generate_network_relations(table: str) -> dict:
+    """
+    Generate the Relationship graph from the database.
 
-    # print(author_relations_df)
+    Returns:
+    - dict: Relationship graph data
+    """
+    author_relations_df = pd.DataFrame(author_relations(table))
 
     # generate nodes
     unique_authors = author_relations_df.iloc[:, 1].unique()

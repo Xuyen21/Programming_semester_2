@@ -7,7 +7,7 @@ from dash_bootstrap_components.themes import BOOTSTRAP
 
 from components.navbar import navbar
 
-from modules.postgres import sql_from_dropdown, papers_per_month
+from modules.postgres import sql_from_dropdown, papers_per_week
 
 from pages.aggregation import aggregation_tab
 from pages.relation import relation_tab, generate_network_relations
@@ -86,18 +86,17 @@ def draw_timespan(selected_year: str):
     if not selected_year:
         selected_year = "2022"
 
-    df = papers_per_month(selected_year)
+    values = papers_per_week(selected_year)
 
-    fig = px.bar(df, x='month', y='count', color='entryType', barmode='group')
-    fig.update_layout(
-        xaxis_title="Month",
-        yaxis_title="Number of publications",
-    )
+    selected_columns: list[str] = ['Calendar week','count']
+
+    df = pd.DataFrame(values, columns=selected_columns)
+
+    df = df.sort_values(by=[selected_columns[1]], ascending=True)
+
+    fig = px.bar(df, x=selected_columns[0], y=selected_columns[1])
 
     return fig
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)

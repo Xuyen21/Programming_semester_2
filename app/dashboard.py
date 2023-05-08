@@ -2,16 +2,16 @@ import logging
 import pandas as pd
 import plotly.express as px
 from dash import dcc, Dash, html, Input, Output, dash
-import dash_bootstrap_components as dbc
 from dash_bootstrap_components.themes import BOOTSTRAP
 
 from components.navbar import navbar
 
 from modules.postgres import sql_from_dropdown, papers_per_week
 
-from pages.aggregation import aggregation_tab
+from app.pages.aggres.aggregation import aggregation_tab
 from pages.relation import relation_tab, generate_network_relations
 from pages.timespan import timespan_tab
+from pages.aggres.aggres_render import aggres_render
 
 # logging configuration
 logging.basicConfig(
@@ -26,6 +26,7 @@ app_layout = dcc.Tabs([
     timespan_tab
 ])
 
+
 def create_layout() -> html.Div:
     return html.Div(
         className="app-div",
@@ -35,36 +36,17 @@ def create_layout() -> html.Div:
         ]
     )
 
+
 app = Dash(
-    name = "DBLP Dashboard",
-    title = "Welcome to DBLP",
+    name="DBLP Dashboard",
+    title="Welcome to DBLP",
     external_stylesheets=[BOOTSTRAP]
 )
 app.layout = create_layout()
 
 # aggregation callback
-@app.callback(
-    Output("aggregation_chart", "figure"),
-    Input("tabelle_dropdown", "value")
-)
-def draw_aggregation(selected_table: str):
+aggres_render(app=app)
 
-    if not selected_table:
-        selected_table = "publisher"
-
-    selected_columns: list[str] = [f'{selected_table}.name', 'sub_col.count']
-
-    values = sql_from_dropdown(selected_columns, selected_table, "name", f'COUNT({selected_table}_{"id"})')
-
-    selected_columns: list[str] = ['name','count']
-
-    df = pd.DataFrame(values, columns=selected_columns)
-
-    df = df.sort_values(by=[selected_columns[1]], ascending=True)
-
-    fig = px.bar(df, x=selected_columns[0], y=selected_columns[1])
-
-    return fig
 
 # relation callback
 @app.callback(
@@ -77,6 +59,7 @@ def draw_relation_network(table: str):
 
     return generate_network_relations(table)
 
+
 # timespan callback
 @app.callback(
     Output("timespan_chart", "figure"),
@@ -88,7 +71,7 @@ def draw_timespan(selected_year: str):
 
     values = papers_per_week(selected_year)
 
-    selected_columns: list[str] = ['Calendar week','count']
+    selected_columns: list[str] = ['Calendar week', 'count']
 
     df = pd.DataFrame(values, columns=selected_columns)
 
@@ -97,6 +80,7 @@ def draw_timespan(selected_year: str):
     fig = px.bar(df, x=selected_columns[0], y=selected_columns[1])
 
     return fig
+
 
 if __name__ == '__main__':
     app.run(debug=True)

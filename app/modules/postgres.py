@@ -8,6 +8,7 @@ from time import time
 from psycopg2 import connect, sql, errors
 from dotenv import load_dotenv
 import logging
+import pandas as pd
 
 # load environments from .env file
 load_dotenv()
@@ -164,29 +165,37 @@ def author_relations(table: str) -> list[tuple]:
     # return results
     return cursor.fetchall()
 
-def papers_per_week(year: str) -> list[tuple]:
+
+def papers_per_month(year: str) -> pd.DataFrame:
+    # create a subquery to select entry keys and their types
     sub_query = sql.SQL("""
-    (
-        SELECT key, mdate, DATE_PART('week',mdate) as week_number
-        FROM entry
-        WHERE EXTRACT(YEAR FROM mdate) = {year}
-        ORDER BY week_number DESC 
-    ) AS sub_col
-    """).format(
-        year = sql.Literal(year)
-    )
+        SELECT entry_key, 'phdthesis' as entryType
+        FROM phdthesis
+        UNION
+        SELECT entry_key, 'mastersthesis' as entryType
+        FROM mastersthesis
+        UNION 
+        SELECT entry_key, 'article' as entryType
+        FROM article
+        UNION
+        SELECT entry_key, 'book' as entryType
+        FROM book
+    """)
 
-    # generate sql query
+    # generate sql query to select entries with the given year and month, and their types
     sql_query = sql.SQL("""
-        SELECT week_number, COUNT(key)
-        FROM {sub_query}
-        GROUP BY week_number
-        ORDER BY week_number"""
-    ).format(
-        sub_query = sub_query
+        SELECT DATE_TRUNC('month', e.mdate) as month, n.entryType, COUNT(n.entryType)
+        FROM entry e
+        JOIN ({sub_query}) n ON e.key = n.entry_key
+        WHERE EXTRACT(YEAR FROM e.mdate) = {year}
+        GROUP BY month, n.entryType
+        ORDER BY month
+    """).format(
+        sub_query=sub_query,
+        year=sql.Literal(year)
     )
 
-    # execute query
+    # execute query and fetch results into a pandas DataFrame
     try:
         t1 = time()
         cursor.execute(sql_query)
@@ -197,5 +206,12 @@ def papers_per_week(year: str) -> list[tuple]:
     except Exception as err:
         logging.error(err)
 
-    # return results
-    return cursor.fetchall()
+    results = cursor.fetchall()
+    df = pd.DataFrame(results, columns=['month', 'entryType', 'count'])
+
+    return df
+
+
+
+
+

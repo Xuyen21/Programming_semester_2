@@ -9,9 +9,10 @@ from components.navbar import navbar
 
 from modules.postgres import sql_from_dropdown, papers_per_month
 
-from pages.aggregation import aggregation_tab
+from pages.aggres.aggregation import aggregation_tab
 from pages.relation import relation_tab, generate_network_relations
 from pages.timespan import timespan_tab
+from pages.aggres.aggres_rendering import aggres_render
 
 # logging configuration
 logging.basicConfig(
@@ -43,28 +44,7 @@ app = Dash(
 app.layout = create_layout()
 
 # aggregation callback
-@app.callback(
-    Output("aggregation_chart", "figure"),
-    Input("tabelle_dropdown", "value")
-)
-def draw_aggregation(selected_table: str):
-
-    if not selected_table:
-        selected_table = "publisher"
-
-    selected_columns: list[str] = [f'{selected_table}.name', 'sub_col.count']
-
-    values = sql_from_dropdown(selected_columns, selected_table, "name", f'COUNT({selected_table}_{"id"})')
-
-    selected_columns: list[str] = ['name','count']
-
-    df = pd.DataFrame(values, columns=selected_columns)
-
-    df = df.sort_values(by=[selected_columns[1]], ascending=True)
-
-    fig = px.bar(df, x=selected_columns[0], y=selected_columns[1])
-
-    return fig
+aggres_render(app=app)
 
 # relation callback
 @app.callback(

@@ -9,7 +9,7 @@ from components.navbar import navbar
 
 from modules.postgres import sql_from_dropdown, papers_per_month
 
-from pages.aggregation import aggregation_tab
+from pages.aggres.aggregation import aggregation_tab
 from pages.relation import relation_tab, generate_network_relations
 from pages.timespan import timespan_tab
 
@@ -75,7 +75,7 @@ def draw_relation_network(table: str):
     if table is None:
         return dash.no_update
 
-    return generate_network_relations()
+    return generate_network_relations(table)
 
 # timespan callback
 @app.callback(

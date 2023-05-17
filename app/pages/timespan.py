@@ -1,6 +1,15 @@
+import os
+from dotenv import load_dotenv
+# load environments from .env file
+load_dotenv()
+
+# not working in VSCODE without that
+if os.getenv('VSCODE') == "True":
+    import sys
+    sys.path.append('./')
+
 from dash import dcc, html
 import dash_bootstrap_components as dbc
-from app import components
 
 from app.components.filter_card import generate_filter_card
 from app.components.settings_card import generate_settings_card

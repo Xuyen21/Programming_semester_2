@@ -6,6 +6,7 @@ Created at: 1.5.2023
 """
 import logging
 from itertools import combinations
+# https://github.com/jimmybow/visdcc
 from visdcc import Network
 import pandas as pd
 from dash import html, dcc
@@ -70,7 +71,7 @@ def generate_network_relations(attribute: str, table: str, limit: int) -> dict:
     try:
         unique_entries = relations_df.iloc[:, 1].unique()
     except IndexError as e:
-        logging.error(relations_df[:, 1].unique())
+        logging.error(relations_df.iloc[:, 1].unique())
 
     nodes: list[dict] = [{'id': author, 'label': author} for author in unique_entries]
 
@@ -80,6 +81,7 @@ def generate_network_relations(attribute: str, table: str, limit: int) -> dict:
     edges = []
 
     for entry in unique_entries:
+        nodes.append({'id': entry, 'label': entry, 'color': '#d54121'})
         authors = relations_df[relations_df.iloc[:, 0] == entry].iloc[:, 1]
         for author_permutations in combinations(authors, 2):
             edges.append({

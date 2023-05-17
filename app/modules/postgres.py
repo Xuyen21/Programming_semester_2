@@ -166,6 +166,48 @@ def author_relations(table: str, limit: int) -> list[tuple]:
     # return results
     return cursor.fetchall()
 
+def school_relations(table: str, limit: int) -> list[tuple]:
+
+    sub_query = sql.SQL("""
+    (
+        SELECT {select}
+        FROM {table}
+        LEFT JOIN entry_school ON {on} = entry_school.entry_key
+        GROUP BY {group_by}
+        ORDER BY COUNT(entry_school.school_id) DESC
+        LIMIT {limit}
+    ) as sub_col"""
+    ).format(
+        select = sql.SQL(f'{table}.entry_key'),
+        table = sql.Identifier(table),
+        group_by = sql.SQL(f'{table}.entry_key'),
+        on = sql.SQL(f'{table}.entry_key'),
+        limit = sql.Literal(limit)
+    )
+
+    # generate sql query
+    sql_query = sql.SQL("""
+        SELECT sub_col.entry_key, school.name
+        FROM {sub_query}
+        LEFT JOIN entry_school ON sub_col.entry_key = entry_school.entry_key
+        LEFT JOIN school ON entry_school.school_id = school.id;"""
+    ).format(
+        sub_query = sub_query
+    )
+
+    # execute query
+    try:
+        t1 = time()
+        cursor.execute(sql_query)
+        t2 = time()
+        logging.debug(f'school_relations query took: {t2 - t1:.3} seconds')
+    except errors.SyntaxError as err:
+        logging.warning(err)
+    except Exception as err:
+        logging.error(err)
+
+    # return results
+    return cursor.fetchall()
 
 def papers_per_month(year: str) -> pd.DataFrame:
     # create a subquery to select entry keys and their types

@@ -68,14 +68,15 @@ def draw_aggregation(selected_table: str):
 # relation callback
 @app.callback(
     Output("relation_network", "data"),
+    Input("relation_attribute_dropdown", "value"),
     Input("relation_dropdown", "value"),
     Input("relation_limit_slider", "value")
 )
-def draw_relation_network(table: str, limit: int):
+def draw_relation_network(attribute: str, table: str, limit: int):
     if table is None:
         return dash.no_update
 
-    return generate_network_relations(table, limit)
+    return generate_network_relations(attribute, table, limit)
 
 # timespan callback
 @app.callback(

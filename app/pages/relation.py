@@ -12,7 +12,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 # modules
-from modules.postgres import author_relations
+from modules.postgres import author_relations, school_relations
 
 # dashboard components
 from components.filter_card import generate_filter_card
@@ -22,7 +22,13 @@ from components.info_card import info_card
 # define form
 relation_form = html.Div([
     dbc.Row([
-        dbc.Label("Tabelle"),
+        dbc.Label("Attribute"),
+        dcc.Dropdown(
+            ["author", "school"],
+            value = "author",
+            id = "relation_attribute_dropdown"
+        ),
+        dbc.Label("Table"),
         dcc.Dropdown(
             ["phdthesis", "mastersthesis"],
             value = "phdthesis",
@@ -47,30 +53,34 @@ relation_chart = Network(id = 'relation_network',
     }
 )
 
-def generate_network_relations(table: str, limit: int) -> dict:
+def generate_network_relations(attribute: str, table: str, limit: int) -> dict:
     """
     Generate the Relationship graph from the database.
 
     Returns:
     - dict: Relationship graph data
     """
-    author_relations_df = pd.DataFrame(author_relations(table, limit))
+    if attribute == "school":
+        relations_df = pd.DataFrame(school_relations(table, limit))
+    else:
+        relations_df = pd.DataFrame(author_relations(table, limit))
+
 
     # generate nodes
     try:
-        unique_authors = author_relations_df.iloc[:, 1].unique()
+        unique_entries = relations_df.iloc[:, 1].unique()
     except IndexError as e:
-        logging.error(author_relations_df[:, 1].unique())
+        logging.error(relations_df[:, 1].unique())
 
-    nodes: list[dict] = [{'id': author, 'label': author} for author in unique_authors]
+    nodes: list[dict] = [{'id': author, 'label': author} for author in unique_entries]
 
     # generate edges
-    unique_entries = author_relations_df.iloc[:, 0].unique()
+    unique_entries = relations_df.iloc[:, 0].unique()
 
     edges = []
 
     for entry in unique_entries:
-        authors = author_relations_df[author_relations_df.iloc[:, 0] == entry].iloc[:, 1]
+        authors = relations_df[relations_df.iloc[:, 0] == entry].iloc[:, 1]
         for author_permutations in combinations(authors, 2):
             edges.append({
                 'id': f'{entry}_{author_permutations[0]}_{author_permutations[1]}',

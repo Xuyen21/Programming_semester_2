@@ -90,7 +90,7 @@ def sql_from_dropdown(select: list[str], table: str, group_by: str, order_by: st
         t1 = time()
         cursor.execute(sql_query)
         t2 = time()
-        logging.debug(f'Query took: {t2 - t1:.3} seconds')
+        logging.debug(f'sql_from_dropdown query took: {t2 - t1:.3} seconds')
     except errors.SyntaxError as err:
         logging.warning(err)
     except Exception as err:
@@ -156,7 +156,7 @@ def author_relations(table: str) -> list[tuple]:
         t1 = time()
         cursor.execute(sql_query)
         t2 = time()
-        logging.debug(f'Query took: {t2 - t1:.3} seconds')
+        logging.debug(f'author_relations query took: {t2 - t1:.3} seconds')
     except errors.SyntaxError as err:
         logging.warning(err)
     except Exception as err:
@@ -174,7 +174,7 @@ def papers_per_month(year: str) -> pd.DataFrame:
         UNION
         SELECT entry_key, 'mastersthesis' as entryType
         FROM mastersthesis
-        UNION 
+        UNION
         SELECT entry_key, 'article' as entryType
         FROM article
         UNION
@@ -200,7 +200,7 @@ def papers_per_month(year: str) -> pd.DataFrame:
         t1 = time()
         cursor.execute(sql_query)
         t2 = time()
-        logging.debug(f'Query took: {t2 - t1:.3} seconds')
+        logging.debug(f'papers_per_month query took: {t2 - t1:.3} seconds')
     except errors.SyntaxError as err:
         logging.warning(err)
     except Exception as err:

@@ -30,7 +30,6 @@ def create_layout() -> html.Div:
     return html.Div(
         className="app-div",
         children=[
-            navbar,
             app_layout
         ]
     )
@@ -70,12 +69,13 @@ def draw_aggregation(selected_table: str):
 @app.callback(
     Output("relation_network", "data"),
     Input("relation_dropdown", "value"),
+    Input("relation_limit_slider", "value")
 )
-def draw_relation_network(table: str):
+def draw_relation_network(table: str, limit: int):
     if table is None:
         return dash.no_update
 
-    return generate_network_relations(table)
+    return generate_network_relations(table, limit)
 
 # timespan callback
 @app.callback(

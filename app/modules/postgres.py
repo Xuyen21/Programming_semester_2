@@ -123,7 +123,7 @@ def table_column_names(table: str) -> list[tuple]:
     # return results
     return cursor.fetchall()
 
-def author_relations(table: str) -> list[tuple]:
+def author_relations(table: str, limit: int) -> list[tuple]:
 
     sub_query = sql.SQL("""
     (
@@ -132,13 +132,14 @@ def author_relations(table: str) -> list[tuple]:
         LEFT JOIN entry_author ON {on} = entry_author.entry_key
         GROUP BY {group_by}
         ORDER BY COUNT(entry_author.author_id) DESC
-        LIMIT 10
+        LIMIT {limit}
     ) as sub_col"""
     ).format(
         select = sql.SQL(f'{table}.entry_key'),
         table = sql.Identifier(table),
         group_by = sql.SQL(f'{table}.entry_key'),
-        on = sql.SQL(f'{table}.entry_key')
+        on = sql.SQL(f'{table}.entry_key'),
+        limit = sql.Literal(limit)
     )
 
     # generate sql query
@@ -211,7 +212,7 @@ def papers_per_month(year: str) -> pd.DataFrame:
 
     return df
 
-
-
-
-
+if __name__ == '__main__':
+    print(pd.DataFrame(author_relations("phdthesis", 10)).head())
+    print(pd.DataFrame(author_relations("mastersthesis", 10)).head())
+    print(pd.DataFrame(author_relations("article", 10)).head())

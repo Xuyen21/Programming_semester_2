@@ -4,6 +4,7 @@ This module is responsible for the relations tab of the DBLP Dashboard.
 Created by: Silvan Wiedmer
 Created at: 1.5.2023
 """
+import logging
 from itertools import combinations
 from visdcc import Network
 import pandas as pd
@@ -23,10 +24,17 @@ relation_form = html.Div([
     dbc.Row([
         dbc.Label("Tabelle"),
         dcc.Dropdown(
-            ["phdthesis", "mastersthesis", "article"],
+            ["phdthesis", "mastersthesis"],
             value = "phdthesis",
             id = "relation_dropdown"
         )
+    ])
+])
+
+relation_settings = html.Div([
+    dbc.Row([
+        dbc.Label("Count"),
+        dcc.Slider(5,20,5, value = 10, id="relation_limit_slider")
     ])
 ])
 
@@ -39,17 +47,20 @@ relation_chart = Network(id = 'relation_network',
     }
 )
 
-def generate_network_relations(table: str) -> dict:
+def generate_network_relations(table: str, limit: int) -> dict:
     """
     Generate the Relationship graph from the database.
 
     Returns:
     - dict: Relationship graph data
     """
-    author_relations_df = pd.DataFrame(author_relations(table))
+    author_relations_df = pd.DataFrame(author_relations(table, limit))
 
     # generate nodes
-    unique_authors = author_relations_df.iloc[:, 1].unique()
+    try:
+        unique_authors = author_relations_df.iloc[:, 1].unique()
+    except IndexError as e:
+        logging.error(author_relations_df[:, 1].unique())
 
     nodes: list[dict] = [{'id': author, 'label': author} for author in unique_authors]
 
@@ -78,7 +89,7 @@ relation_tab = dcc.Tab(label = "Relation", children = [
     dbc.Row([
         dbc.Col([
             generate_filter_card(relation_form),
-            generate_settings_card(html.P("Not Implemented")),
+            generate_settings_card(relation_settings),
             info_card
         ], width=2),
         dbc.Col(dbc.Card(

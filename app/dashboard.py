@@ -73,7 +73,7 @@ def draw_aggregation(selected_table: str):
     Input("relation_limit_slider", "value")
 )
 def draw_relation_network(attribute: str, table: str, limit: int):
-    if table is None:
+    if attribute is None or table is None or limit is None:
         return dash.no_update
 
     return generate_network_relations(attribute, table, limit)

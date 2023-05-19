@@ -6,6 +6,7 @@ Created at: 1.5.2023
 """
 import logging
 from itertools import combinations
+
 # https://github.com/jimmybow/visdcc
 from visdcc import Network
 import pandas as pd
@@ -66,14 +67,10 @@ def generate_network_relations(attribute: str, table: str, limit: int) -> dict:
     else:
         relations_df = pd.DataFrame(author_relations(table, limit))
 
-
     # generate nodes
-    try:
-        unique_entries = relations_df.iloc[:, 1].unique()
-    except IndexError as e:
-        logging.error(relations_df.iloc[:, 1].unique())
+    unique_entries = relations_df.iloc[:, 1].unique()
 
-    nodes: list[dict] = [{'id': author, 'label': author} for author in unique_entries]
+    nodes: list[dict] = [{'id': author, 'label': author, 'color': '#79a9d1'} for author in unique_entries]
 
     # generate edges
     unique_entries = relations_df.iloc[:, 0].unique()
@@ -81,13 +78,13 @@ def generate_network_relations(attribute: str, table: str, limit: int) -> dict:
     edges = []
 
     for entry in unique_entries:
-        nodes.append({'id': entry, 'label': entry, 'color': '#d54121'})
+        nodes.append({'id': entry, 'label': entry, 'color': '#7cea9c'})
         authors = relations_df[relations_df.iloc[:, 0] == entry].iloc[:, 1]
-        for author_permutations in combinations(authors, 2):
+        for author in authors:
             edges.append({
-                'id': f'{entry}_{author_permutations[0]}_{author_permutations[1]}',
-                'from': author_permutations[0],
-                'to': author_permutations[1]
+                'id': f'{entry}_{author}',
+                'from': entry,
+                'to': author
             })
 
     # build data dict

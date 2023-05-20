@@ -10,8 +10,9 @@ def aggres_render(app: Dash):
     In Aggregation tab in the navbar, user selects one column
     Returns: description of the chosen column and aggregations of the it in different type of charts
     """
+
     @app.callback([Output("aggregation_chart", "figure"), Output("chart_content", "children"),
-                   Output("top_popularity_slider", "value")],
+                   ],
                   [Input("tabelle_dropdown", "value"), Input("chart_type", "value"),
                    Input("top_popularity_slider", "value")]
                   )
@@ -39,6 +40,6 @@ def aggres_render(app: Dash):
         df = df.sort_values(by=[count], ascending=True)
 
         if chart_type == 'bar chart':
-            return px.bar(df, x=name, y=count), content, popularity_slider
+            return px.bar(df, x=name, y=count), content
         if chart_type == 'pie chart':
-            return px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0]), content, popularity_slider
+            return px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0]), content

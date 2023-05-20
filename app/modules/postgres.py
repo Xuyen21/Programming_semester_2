@@ -90,7 +90,7 @@ def sql_from_dropdown(select: list[str], table: str, group_by: str, order_by: st
         t1 = time()
         cursor.execute(sql_query)
         t2 = time()
-        logging.debug(f'Query took: {t2 - t1:.3} seconds')
+        logging.debug(f'sql_from_dropdown query took: {t2 - t1:.3} seconds')
     except errors.SyntaxError as err:
         logging.warning(err)
     except Exception as err:
@@ -123,7 +123,7 @@ def table_column_names(table: str) -> list[tuple]:
     # return results
     return cursor.fetchall()
 
-def author_relations(table: str) -> list[tuple]:
+def author_relations(table: str, limit: int) -> list[tuple]:
 
     sub_query = sql.SQL("""
     (
@@ -132,13 +132,14 @@ def author_relations(table: str) -> list[tuple]:
         LEFT JOIN entry_author ON {on} = entry_author.entry_key
         GROUP BY {group_by}
         ORDER BY COUNT(entry_author.author_id) DESC
-        LIMIT 10
+        LIMIT {limit}
     ) as sub_col"""
     ).format(
         select = sql.SQL(f'{table}.entry_key'),
         table = sql.Identifier(table),
         group_by = sql.SQL(f'{table}.entry_key'),
-        on = sql.SQL(f'{table}.entry_key')
+        on = sql.SQL(f'{table}.entry_key'),
+        limit = sql.Literal(limit)
     )
 
     # generate sql query
@@ -156,7 +157,50 @@ def author_relations(table: str) -> list[tuple]:
         t1 = time()
         cursor.execute(sql_query)
         t2 = time()
-        logging.debug(f'Query took: {t2 - t1:.3} seconds')
+        logging.debug(f'author_relations query took: {t2 - t1:.3} seconds')
+    except errors.SyntaxError as err:
+        logging.warning(err)
+    except Exception as err:
+        logging.error(err)
+
+    # return results
+    return cursor.fetchall()
+
+def school_relations(table: str, limit: int) -> list[tuple]:
+
+    sub_query = sql.SQL("""
+    (
+        SELECT {select}
+        FROM {table}
+        LEFT JOIN entry_school ON {on} = entry_school.entry_key
+        GROUP BY {group_by}
+        ORDER BY COUNT(entry_school.school_id) DESC
+        LIMIT {limit}
+    ) as sub_col"""
+    ).format(
+        select = sql.SQL(f'{table}.entry_key'),
+        table = sql.Identifier(table),
+        group_by = sql.SQL(f'{table}.entry_key'),
+        on = sql.SQL(f'{table}.entry_key'),
+        limit = sql.Literal(limit)
+    )
+
+    # generate sql query
+    sql_query = sql.SQL("""
+        SELECT sub_col.entry_key, school.name
+        FROM {sub_query}
+        LEFT JOIN entry_school ON sub_col.entry_key = entry_school.entry_key
+        LEFT JOIN school ON entry_school.school_id = school.id;"""
+    ).format(
+        sub_query = sub_query
+    )
+
+    # execute query
+    try:
+        t1 = time()
+        cursor.execute(sql_query)
+        t2 = time()
+        logging.debug(f'school_relations query took: {t2 - t1:.3} seconds')
     except errors.SyntaxError as err:
         logging.warning(err)
     except Exception as err:
@@ -183,7 +227,7 @@ def papers_per_month(year: str) -> pd.DataFrame:
         UNION
         SELECT entry_key, 'mastersthesis' as entryType
         FROM mastersthesis
-        UNION 
+        UNION
         SELECT entry_key, 'article' as entryType
         FROM article
         UNION
@@ -207,7 +251,7 @@ def papers_per_month(year: str) -> pd.DataFrame:
         t1 = time()
         cursor.execute(sql_query)
         t2 = time()
-        logging.debug(f'Query took: {t2 - t1:.3} seconds')
+        logging.debug(f'papers_per_month query took: {t2 - t1:.3} seconds')
     except errors.SyntaxError as err:
         logging.warning(err)
     except Exception as err:

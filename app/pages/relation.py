@@ -5,12 +5,11 @@ Created by: Silvan Wiedmer
 Created at: 1.5.2023
 """
 import logging
-from itertools import combinations
 
 # https://github.com/jimmybow/visdcc
 from visdcc import Network
 import pandas as pd
-from dash import html, dcc
+from dash import html, dcc, Input, Output, dash
 import dash_bootstrap_components as dbc
 
 # modules
@@ -94,18 +93,33 @@ def generate_network_relations(attribute: str, table: str, limit: int) -> dict:
     }
     return data
 
-relation_tab = dcc.Tab(label = "Relation", children = [
-    dbc.Row([
-        dbc.Col([
-            generate_filter_card(relation_form),
-            generate_settings_card(relation_settings),
-            info_card
-        ], width=2),
-        dbc.Col(dbc.Card(
-            dbc.CardBody(dcc.Loading(
-                type = "default",
-                children = relation_chart)
-            )
-        ), width=10)
-    ])
-])
+relation_tab = dcc.Tab(label = "Relation", value="relation_tab")
+
+# define relation_children
+relation_children = [
+    dbc.Col([
+        generate_filter_card(relation_form),
+        generate_settings_card(relation_settings),
+        info_card
+    ], width=2),
+    dbc.Col(dbc.Card(
+        dbc.CardBody(dcc.Loading(
+            type = "default",
+            children = relation_chart)
+        )
+    ), width=10)
+]
+
+# define relation_callback
+def relation_callback(app):
+    @app.callback(
+        Output("relation_network", "data"),
+        Input("relation_attribute_dropdown", "value"),
+        Input("relation_dropdown", "value"),
+        Input("relation_limit_slider", "value")
+    )
+    def draw_relation_network(attribute: str, table: str, limit: int):
+        if attribute is None or table is None or limit is None:
+            return dash.no_update
+
+        return generate_network_relations(attribute, table, limit)

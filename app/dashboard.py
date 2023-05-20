@@ -78,24 +78,31 @@ def draw_relation_network(attribute: str, table: str, limit: int):
 
     return generate_network_relations(attribute, table, limit)
 
+
 # timespan callback
 @app.callback(
     Output("timespan_chart", "figure"),
-    Input("year_dropdown", "value")
+    Input("year_dropdown", "value"),
+    Input("chart_type_dropdown", "value")
 )
-def draw_timespan(selected_year: str):
+def draw_timespan(selected_year: str, chart_type: str):
     if not selected_year:
         selected_year = "2022"
 
     df = papers_per_month(selected_year)
 
-    fig = px.bar(df, x='month', y='count', color='entryType', barmode='group')
+    if chart_type == "bar":
+        fig = px.bar(df, x='month', y='count', color='entryType', barmode='group')
+    elif chart_type == "pie":
+        fig = px.pie(df, values='count', names='entryType')
+
     fig.update_layout(
         xaxis_title="Month",
         yaxis_title="Number of publications",
     )
 
     return fig
+
 
 if __name__ == '__main__':
     app.run(debug=True)

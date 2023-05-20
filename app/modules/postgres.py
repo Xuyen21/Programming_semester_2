@@ -165,9 +165,18 @@ def author_relations(table: str) -> list[tuple]:
     # return results
     return cursor.fetchall()
 
+def update_year_dropdown():
+    sql_query = """
+    SELECT DISTINCT EXTRACT(YEAR FROM mdate) as year
+    FROM entry
+    WHERE EXTRACT(YEAR FROM mdate) != EXTRACT(YEAR FROM NOW())
+    """
+    cursor.execute(sql_query)
+    years = cursor.fetchall()
+    options = [{"label": str(year[0]), "value": str(year[0])} for year in years]
+    return options
 
 def papers_per_month(year: str) -> pd.DataFrame:
-    # create a subquery to select entry keys and their types
     sub_query = sql.SQL("""
         SELECT entry_key, 'phdthesis' as entryType
         FROM phdthesis
@@ -182,7 +191,6 @@ def papers_per_month(year: str) -> pd.DataFrame:
         FROM book
     """)
 
-    # generate sql query to select entries with the given year and month, and their types
     sql_query = sql.SQL("""
         SELECT DATE_TRUNC('month', e.mdate) as month, n.entryType, COUNT(n.entryType)
         FROM entry e
@@ -195,7 +203,6 @@ def papers_per_month(year: str) -> pd.DataFrame:
         year=sql.Literal(year)
     )
 
-    # execute query and fetch results into a pandas DataFrame
     try:
         t1 = time()
         cursor.execute(sql_query)
@@ -210,8 +217,3 @@ def papers_per_month(year: str) -> pd.DataFrame:
     df = pd.DataFrame(results, columns=['month', 'entryType', 'count'])
 
     return df
-
-
-
-
-

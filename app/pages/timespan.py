@@ -15,23 +15,36 @@ from app.components.filter_card import generate_filter_card
 from app.components.settings_card import generate_settings_card
 from app.components.info_card import info_card
 
-# define form
+from app.modules.postgres import update_year_dropdown
+
+# Define form
 timespan_form = html.Div([
     dbc.Row([
-        dbc.Label("Tabelle"),
+        dbc.Label("Table"),
         dcc.Dropdown(
-            ["2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021", "2022"],
+            options=update_year_dropdown(),
             placeholder="Choose the year",
-            id = "year_dropdown"
+            id="year_dropdown"
+        )
+    ]),
+    dbc.Row([
+        dbc.Label("Chart Type"),
+        dcc.Dropdown(
+            options=[
+                {"label": "Bar Chart", "value": "bar"},
+                {"label": "Pie Chart", "value": "pie"}
+            ],
+            value="bar",
+            id="chart_type_dropdown"
         )
     ])
 ])
 
-# define chart
+# Define chart
 timespan_chart = dcc.Graph(id="timespan_chart")
 
-# define aggregation tab
-timespan_tab = dcc.Tab(label = "Timespan", children = [
+# Define timespan tab
+timespan_tab = dcc.Tab(label="Timespan", children=[
     dbc.Row([
         dbc.Col([
             generate_filter_card(timespan_form),
@@ -40,8 +53,8 @@ timespan_tab = dcc.Tab(label = "Timespan", children = [
         ], width=2),
         dbc.Col(dbc.Card(
             dbc.CardBody(dcc.Loading(
-                type = "default",
-                children = timespan_chart))
+                type="default",
+                children=timespan_chart))
         ), width=10)
     ])
 ])

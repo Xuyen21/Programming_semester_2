@@ -1,80 +1,62 @@
 import logging
-import pandas as pd
-import plotly.express as px
-from dash import dcc, Dash, html, Input, Output, dash
+from dash import dcc, Dash, html, Input, Output
 import dash_bootstrap_components as dbc
 from dash_bootstrap_components.themes import BOOTSTRAP
 
-from components.navbar import navbar
-
-from modules.postgres import sql_from_dropdown, papers_per_month
-
-from pages.aggres.aggregation import aggregation_tab
-from pages.relation import relation_tab, generate_network_relations
-from pages.timespan import timespan_tab
+from pages.aggres.aggregation import aggregation_tab, aggregation_children
 from pages.aggres.aggres_rendering import aggres_render
+from pages.relation import relation_tab, relation_children, relation_callback
+from pages.timespan import timespan_tab, timespan_children, timespan_callback
+
 
 # logging configuration
 logging.basicConfig(
     format='%(levelname)s : [%(filename)s:%(lineno)d] : %(message)s',
-    level=logging.DEBUG
+    level=logging.ERROR
 )
 logging.getLogger(__name__)
+
+# available tabs
+TABS: dict = {
+    "aggregation_tab": aggregation_children,
+    "relation_tab": relation_children,
+    "timespan_tab": timespan_children
+}
 
 app_layout = dcc.Tabs([
     aggregation_tab,
     relation_tab,
     timespan_tab
-])
-
-def create_layout() -> html.Div:
-    return html.Div(
-        className="app-div",
-        children=[
-            navbar,
-            app_layout
-        ]
-    )
+], id="tabs", value="aggregation_tab")
 
 app = Dash(
     name = "DBLP Dashboard",
     title = "Welcome to DBLP",
     external_stylesheets=[BOOTSTRAP]
 )
-app.layout = create_layout()
 
-# aggregation callback
-aggres_render(app=app)
+app.layout = html.Div(
+        className="app-div",
+        children=[
+            app_layout,
+            dbc.Row(id="content")
+        ]
 
-# relation callback
-@app.callback(
-    Output("relation_network", "data"),
-    Input("relation_dropdown", "value"),
-)
-def draw_relation_network(table: str):
-    if table is None:
-        return dash.no_update
-
-    return generate_network_relations()
-
-# timespan callback
-@app.callback(
-    Output("timespan_chart", "figure"),
-    Input("year_dropdown", "value")
-)
-def draw_timespan(selected_year: str):
-    if not selected_year:
-        selected_year = "2022"
-
-    df = papers_per_month(selected_year)
-
-    fig = px.bar(df, x='month', y='count', color='entryType', barmode='group')
-    fig.update_layout(
-        xaxis_title="Month",
-        yaxis_title="Number of publications",
     )
 
-    return fig
+# tab callback
+@app.callback(
+    Output('content', 'children'),
+    Input('tabs', 'value')
+)
+def render_content(tab_name: str):
+    return TABS.get(tab_name, aggregation_children)
 
 if __name__ == '__main__':
+    # initialize callbacks from external files
+    aggres_render(app)
+    relation_callback(app)
+    timespan_callback(app)
+
+    # start app
     app.run(debug=True)

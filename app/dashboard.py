@@ -3,7 +3,7 @@ from dash import dcc, Dash, html, Input, Output
 import dash_bootstrap_components as dbc
 from dash_bootstrap_components.themes import BOOTSTRAP
 
-from pages.aggres.aggregation import aggregation_tab, aggregation_children
+from pages.aggres.aggregation import aggregation_children, aggregation_tab
 from pages.aggres.aggres_rendering import aggres_render
 from pages.relation import relation_tab, relation_children, relation_callback
 from pages.timespan import timespan_tab, timespan_children, timespan_callback
@@ -32,7 +32,8 @@ app_layout = dcc.Tabs([
 app = Dash(
     name = "DBLP Dashboard",
     title = "Welcome to DBLP",
-    external_stylesheets=[BOOTSTRAP]
+    external_stylesheets=[BOOTSTRAP],
+    assets_folder='assets' # to render the word_clouds image (aggregation part)
 )
 
 app.layout = html.Div(

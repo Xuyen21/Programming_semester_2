@@ -42,8 +42,8 @@ aggregation_chart = dcc.Graph(id="aggregation_chart")
 aggregation_tab = dcc.Tab(label="Aggregation", value="aggregation_tab")
 
 # define settings
-setting = dbc.CardBody(children=[
-    html.P(f'top popularity'),
+setting = html.Div(children=[
+    html.P('Top popularity'),
     dcc.Slider(5, 20, 5, value=10, id='top_popularity_slider'),
     # allow user to slide the popularity range, default value is top 10
     dcc.Dropdown(['bar chart', 'pie chart'], placeholder='choose your preferable chart', value='bar chart',

@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.express as px
-from dash import dcc, Dash, html, Input, Output, dash
+from dash import dcc, Dash, html, Input, Output, dash, State
 from modules.postgres import sql_from_dropdown
 from .aggres_contents import get_agres_contents
 
@@ -16,13 +16,9 @@ def aggres_render(app: Dash):
                    Input("top_popularity_slider", "value")]
                   )
     # set author, and bar chart as default
-    def draw_aggregation(selected_table: str = 'author', chart_type: str = 'bar chart', popularity_slider=None):
+    def draw_aggregation(selected_table: str = 'author', chart_type: str = 'bar chart', popularity_slider=10):
 
-        # display content according to user-chosen column
-        if popularity_slider is None:
-            popularity_slider = [0, 10]
-        # get the user-chosen popularity, use round because the limit must be an integer
-        data_limit = round(popularity_slider[1])
+        data_limit = round(popularity_slider)
 
         content = get_agres_contents(column_name=selected_table)
 
@@ -42,3 +38,14 @@ def aggres_render(app: Dash):
             return px.bar(df, x=name, y=count), content, popularity_slider
         if chart_type == 'pie chart':
             return px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0]), content, popularity_slider
+
+    # user clicked button, a modal of word_clouds image will be shown
+    @app.callback(
+        Output("modal", "is_open"),
+        [Input("word_clouds_btn", "n_clicks"), Input("close-button", "n_clicks")],
+        [State("modal", "is_open")],
+    )
+    def toggle_modal(open_clicks, close_clicks, is_open):
+        if open_clicks or close_clicks:
+            return not is_open
+        return is_open

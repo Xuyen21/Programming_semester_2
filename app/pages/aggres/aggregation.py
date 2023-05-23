@@ -14,7 +14,24 @@ aggregation_form = html.Div([
             placeholder="Tabelle auswählen",
             value='author',
             id="tabelle_dropdown"
-        )
+        ),
+        # create button top popover the word_clouds image
+        html.Div([
+            dbc.Button('See top words in titles', id='word_clouds_btn', n_clicks=0, color="info",
+                       className="me-md-2",
+                       style={'margin-top': '20px'}),
+            dbc.Modal([
+                dbc.ModalHeader("Explore the frequency of keywords in title"),
+                dbc.ModalBody([
+                    html.Img(src='/assets/word_clouds.png',
+                             style={"width": "100%", "height": "100%", "object-fit": "contain"}),
+                ], className="modal-content-fullscreen"),
+
+                dbc.ModalFooter(
+                    dbc.Button("Close", id="close-button", className="ml-auto")
+                ),
+            ], id="modal", size="xl"),
+        ]),
     ])
 ])
 
@@ -24,29 +41,39 @@ aggregation_chart = dcc.Graph(id="aggregation_chart")
 # define aggregation tab
 aggregation_tab = dcc.Tab(label="Aggregation", value="aggregation_tab")
 
+# define settings
+setting = html.Div(children=[
+    html.P('Top popularity'),
+    dcc.Slider(5, 20, 5, value=10, id='top_popularity_slider'),
+    # allow user to slide the popularity range, default value is top 10
+    dcc.Dropdown(['bar chart', 'pie chart'], placeholder='choose your preferable chart', value='bar chart',
+                 style={'margin-top': 10},
+                 id='chart_type'),  # different type of charts,  style={'margin-left': 5, "width": "18rem"},
+
+])
 # define aggregation children
-aggregation_children = [
-    dbc.Col([
-        generate_filter_card(form=aggregation_form),
-        generate_settings_card(html.P("Not Implemented")),
-        info_card
-    ], width=2),
-    dbc.Col(
-        [dbc.Card(
-            [dbc.CardBody(id='chart_content', children=''), # show content of a particular column
-                dbc.CardBody(children=[
-                    html.P(f'Drag the slider to see the top popularity'),
-                    dcc.RangeSlider(0, 50, value=[0, 10], allowCross=False,
-                                    tooltip={"placement": "bottom", "always_visible": True},
-                                    id='top_popularity_slider')
-                ])]), # allow user to slide the popularity range, default value is top 10
-            dcc.Dropdown(['bar chart', 'pie chart'], placeholder='choose your preferable chart', value='bar chart',
-                            style={'margin-left': 5, "width": "18rem"}, id='chart_type'), # different type of charts
-            dbc.Card(
-                dbc.CardBody(dcc.Loading(
-                    type="default",
-                    children=aggregation_chart
-                )
-                )
-            )], width=10)
-]
+aggregation_children = dcc.Tab(label="Aggregation", children=[
+    dbc.Row([
+        dbc.Col([
+            generate_filter_card(form=aggregation_form),
+            generate_settings_card(settings=setting),
+            info_card
+        ], width=2),
+
+        dbc.Col(
+            [dbc.Card(
+                children=[dbc.CardBody(id='chart_content', children=''),  # show content of a particular column
+                          ]),
+
+                dbc.Card(
+                    dbc.CardBody(dcc.Loading(
+                        type="default",
+                        children=aggregation_chart
+                    )
+                    )
+                ),
+
+            ], id='diagram_display', width=10),
+
+    ])
+])

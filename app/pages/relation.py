@@ -14,6 +14,7 @@ import dash_bootstrap_components as dbc
 
 # modules
 from modules.postgres import author_relations, school_relations
+from modules.column_descriptions import get_column_description
 
 # dashboard components
 from components.filter_card import generate_filter_card
@@ -46,8 +47,8 @@ relation_settings = html.Div([
 ])
 
 # define chart
-relation_chart = Network(id = 'relation_network', 
-    options = dict(height= '600px', width= '100%'),
+relation_chart = Network(id = 'relation_network',
+    options = dict(height= '700px', width= '100%'),
     data = {
         'nodes': [],
         'edges': []
@@ -103,10 +104,12 @@ relation_children = [
         info_card
     ], width=2),
     dbc.Col(dbc.Card(
-        dbc.CardBody(dcc.Loading(
-            type = "default",
-            children = relation_chart)
-        )
+        dbc.CardBody(
+            dcc.Loading(
+                type = "default",
+                children = [relation_chart, dbc.CardBody(id='column_description_relation', children='', style={'background-color': 'lightgray'})],
+            ),
+        ),
     ), width=10)
 ]
 
@@ -114,12 +117,13 @@ relation_children = [
 def relation_callback(app):
     @app.callback(
         Output("relation_network", "data"),
+        Output("column_description_relation", "children"),
         Input("relation_attribute_dropdown", "value"),
         Input("relation_dropdown", "value"),
         Input("relation_limit_slider", "value")
     )
     def draw_relation_network(attribute: str, table: str, limit: int):
         if attribute is None or table is None or limit is None:
-            return dash.no_update
+            return dash.no_update, dash.no_update
 
-        return generate_network_relations(attribute, table, limit)
+        return generate_network_relations(attribute, table, limit), get_column_description(attribute)

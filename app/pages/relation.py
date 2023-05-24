@@ -9,11 +9,11 @@ import logging
 # https://github.com/jimmybow/visdcc
 from visdcc import Network
 import pandas as pd
-from dash import html, dcc, Input, Output, dash
+from dash import html, dcc, Input, Output, dash, State
 import dash_bootstrap_components as dbc
 
 # modules
-from modules.postgres import author_relations, school_relations
+from modules.postgres import author_relations, school_relations, paper_date_title, paper_authors, paper_schools
 
 # dashboard components
 from components.filter_card import generate_filter_card
@@ -46,8 +46,8 @@ relation_settings = html.Div([
 ])
 
 # define chart
-relation_chart = Network(id = 'relation_network', 
-    options = dict(height= '600px', width= '100%'),
+relation_chart = Network(id = 'relation_network',
+    options = {'height': '600px', 'width': '100%'},
     data = {
         'nodes': [],
         'edges': []
@@ -105,7 +105,14 @@ relation_children = [
     dbc.Col(dbc.Card(
         dbc.CardBody(dcc.Loading(
             type = "default",
-            children = relation_chart)
+            children = [
+                relation_chart,
+                dbc.Modal([
+                dbc.ModalHeader(id='paper_preview_title'),
+                dbc.ModalBody(className="modal-content-fullscreen", id='paper_preview_body')
+            ], id="paper_preview", size="lg")
+            ]
+        )
         )
     ), width=10)
 ]
@@ -123,3 +130,31 @@ def relation_callback(app):
             return dash.no_update
 
         return generate_network_relations(attribute, table, limit)
+
+    @app.callback(
+        Output("paper_preview", "is_open"),
+        Output("paper_preview_body", "children"),
+        Output("paper_preview_title", "children"),
+        Input('relation_network', 'selection'),
+        State("paper_preview", "is_open"),
+    )
+    def toggle_paper_preview(selection: dict, is_open: bool):
+        # no need to update when no selection
+        if selection is None:
+            return False, dash.no_update, dash.no_update
+
+        # generate Paper Preview and show Modal
+        nodes: list[str] = selection.get("nodes", None)
+        if nodes is None:
+            return not is_open , dash.no_update, dash.no_update
+
+        # get data from database
+        date_title: list[tuple] = paper_date_title(nodes[0])
+        authors: list[str] = [author[0] for author in paper_authors(nodes[0])]
+        schools: list[str] = [school[0] for school in paper_schools(nodes[0])]
+
+        return not is_open, dbc.Row([
+            dbc.Label(f'Date: {date_title[0][0]}'),
+            dbc.Label(f'Authors: {", ".join(authors)}'),
+            dbc.Label(f'Schools: {", ".join(schools)}'),
+        ]), dbc.Label(date_title[0][1])

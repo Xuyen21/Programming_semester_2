@@ -2,7 +2,6 @@ import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, State
 from flask_caching import Cache
-from psycopg2 import sql
 from modules.postgres import execute_query
 from modules.postgres_queries import aggregate_column_query
 from modules.column_descriptions import get_column_description

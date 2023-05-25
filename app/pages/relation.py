@@ -14,6 +14,7 @@ import dash_bootstrap_components as dbc
 
 # modules
 from modules.postgres import author_relations, school_relations, paper_date_title, paper_authors, paper_schools
+from modules.column_descriptions import get_column_description
 
 # dashboard components
 from components.filter_card import generate_filter_card
@@ -110,7 +111,8 @@ relation_children = [
                 dbc.Modal([
                 dbc.ModalHeader(id='paper_preview_title'),
                 dbc.ModalBody(className="modal-content-fullscreen", id='paper_preview_body')
-            ], id="paper_preview", size="lg")
+                ], id="paper_preview", size="lg"),
+                dbc.CardBody(id='column_description_relation', children='', style={'background-color': 'lightgray'})
             ]
         )
         )
@@ -121,15 +123,16 @@ relation_children = [
 def relation_callback(app):
     @app.callback(
         Output("relation_network", "data"),
+        Output("column_description_relation", "children"),
         Input("relation_attribute_dropdown", "value"),
         Input("relation_dropdown", "value"),
         Input("relation_limit_slider", "value")
     )
     def draw_relation_network(attribute: str, table: str, limit: int):
         if attribute is None or table is None or limit is None:
-            return dash.no_update
+            return dash.no_update, dash.no_update
 
-        return generate_network_relations(attribute, table, limit)
+        return generate_network_relations(attribute, table, limit), get_column_description(attribute)
 
     @app.callback(
         Output("paper_preview", "is_open"),

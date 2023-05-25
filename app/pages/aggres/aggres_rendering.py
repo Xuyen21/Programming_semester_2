@@ -1,8 +1,8 @@
 import pandas as pd
 import plotly.express as px
-from dash import dcc, Dash, html, Input, Output, dash, State
+from dash import Dash, Input, Output, State
 from modules.postgres import sql_from_dropdown
-from .aggres_contents import get_agres_contents
+from modules.column_descriptions import get_column_description
 
 
 def aggres_render(app: Dash):
@@ -10,7 +10,7 @@ def aggres_render(app: Dash):
     In Aggregation tab in the navbar, user selects one column
     Returns: description of the chosen column and aggregations of the it in different type of charts
     """
-    @app.callback([Output("aggregation_chart", "figure"), Output("chart_content", "children"),
+    @app.callback([Output("aggregation_chart", "figure"), Output("column_description_aggregation", "children"),
                    Output("top_popularity_slider", "value")],
                   [Input("tabelle_dropdown", "value"), Input("chart_type", "value"),
                    Input("top_popularity_slider", "value")]
@@ -20,7 +20,7 @@ def aggres_render(app: Dash):
 
         data_limit = round(popularity_slider)
 
-        content = get_agres_contents(column_name=selected_table)
+        content = get_column_description(column_name=selected_table)
 
         selected_columns: list[str] = [f'{selected_table}.name', 'sub_col.count']
 

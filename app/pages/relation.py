@@ -126,7 +126,7 @@ def relation_callback(app):
         if attribute is None or table is None or limit is None:
             return dash.no_update, dash.no_update
 
-        return generate_network_relations(attribute, table, limit)
+        return generate_network_relations(attribute, table, limit), get_column_description(attribute)
 
     @app.callback(
         Output("paper_preview", "is_open"),

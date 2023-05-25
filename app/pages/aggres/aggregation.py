@@ -8,7 +8,7 @@ from components.info_card import info_card
 # define form
 aggregation_form = html.Div([
     dbc.Row([
-        dbc.Label("Tabelle"),
+        dbc.Label("Table"),
         dcc.Dropdown(
             ["author", "editor", "pages", "publisher", "school"],
             placeholder="Tabelle auswählen",
@@ -43,13 +43,16 @@ aggregation_tab = dcc.Tab(label="Aggregation", value="aggregation_tab")
 
 # define settings
 setting = html.Div(children=[
-    html.P('Top popularity'),
+    dbc.Label('Top popularity'),
     dcc.Slider(5, 20, 5, value=10, id='top_popularity_slider'),
     # allow user to slide the popularity range, default value is top 10
-    dcc.Dropdown(['bar chart', 'pie chart'], placeholder='choose your preferable chart', value='bar chart',
-                 style={'margin-top': 10},
-                 id='chart_type'),  # different type of charts,  style={'margin-left': 5, "width": "18rem"},
-
+    dbc.Label('Chart Type'),
+    dcc.Dropdown(
+        ['bar chart', 'pie chart'],
+        placeholder='choose your preferable chart',
+        value='bar chart',
+        id='chart_type'
+    )  # different type of charts,  style={'margin-left': 5, "width": "18rem"},
 ])
 # define aggregation children
 aggregation_children = dcc.Tab(label="Aggregation", children=[

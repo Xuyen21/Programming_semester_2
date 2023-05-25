@@ -78,7 +78,7 @@ def timespan_callback(app):
         df = papers_per_month(selected_year)
 
         if chart_type == "bar":
-            fig = px.bar(df, x='month', y='count', color='entryType', barmode='group')
+            fig = px.bar(df, x='month', y='count', color='entryType')
         elif chart_type == "pie":
             fig = px.pie(df, values='count', names='entryType')
 

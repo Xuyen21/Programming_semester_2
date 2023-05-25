@@ -270,6 +270,14 @@ def papers_per_month(year: str) -> pd.DataFrame:
 
 
 def author_pubs(name: str):
+    """
+
+    Args:
+        name: value of the point on graph where user cliked on
+
+    Returns: data of that chosen name, which contains year, title and url
+
+    """
     query = sql.SQL("""
   select y.name as year, t.name as title, u.name as ee from author a
 	join  entry_author ea on a.id = ea.author_id
@@ -298,4 +306,4 @@ def author_pubs(name: str):
     return result
 
 
-# author_pubs('Dacheng Tao')
+

@@ -75,10 +75,7 @@ aggregation_children = dcc.Tab(label="Aggregation", children=[
         ], width=2),
 
         dbc.Col(
-            [dbc.Card(
-                children=[dbc.CardBody(id='chart_content', children=''),  # show content of a particular column
-                          ]),
-
+            [
                 dbc.Card(
                     dbc.CardBody(dcc.Loading(
                         type="default",
@@ -86,6 +83,8 @@ aggregation_children = dcc.Tab(label="Aggregation", children=[
                     )
                     )
                 ),
+                dbc.Card(
+                    dbc.CardBody(id='chart_content')) # show content of a particular column
             ], id='diagram_display', width=10),
 
     ])

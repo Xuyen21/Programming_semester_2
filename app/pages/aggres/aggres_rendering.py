@@ -41,6 +41,8 @@ def aggres_render(app: Dash):
         logging.debug(df.head())
         if df.empty:
             return dash.no_update
+        # copy_df = df
+        # print('copy data: ',copy_df.head(3))
         bar_chart = px.bar(df, x=name, y=count, title=chart_title)
         pie_chart = px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0], title=chart_title)
 
@@ -49,7 +51,7 @@ def aggres_render(app: Dash):
         if chart_type == 'pie chart':
             return pie_chart, content
 
-    # user click on button, a modal of word_clouds image will be shown
+    # user click on the blue button, a modal of word_clouds image will be shown
     @app.callback(
         Output("modal", "is_open"),
         [Input("word_clouds_btn", "n_clicks"), Input("close-button", "n_clicks")],
@@ -66,12 +68,24 @@ def aggres_render(app: Dash):
                   [Input("aggregation_chart", "clickData"), Input('close-data-table-btn', "n_clicks")],
                   State("data_table_modal", "is_open"))
     def show_data_table(click_data, close_click, is_open):
+        """
 
-        current_value = click_data['points'][0]['x']
-        total_publications = click_data['points'][0]['y']
+        Args:
+            click_data: get the value from the point where user clicked on
+            close_click: check if user clicked on a close button
+            is_open:  check if user clicked on a  certain point of the graph
 
+        Returns: 10 latest publications of that author/school.. which contains year, title and the url
+
+        """
+
+        current_value = click_data['points'][0]['x']  # return name of the author/school... from dropdown
+        total_publications = click_data['points'][0]['y']  # return number of publications
+        # get data according to the chosen name
         data_info = author_pubs(current_value)
-        result = dash_table.DataTable(data_info, style_data={'height': 'auto', 'whiteSpace': 'normal', 'textAlign': 'left', 'padding': '5px'}, style_header={'textAlign': 'center'})
+        result = dash_table.DataTable(data_info,
+                                      style_data={'height': 'auto', 'whiteSpace': 'normal', 'textAlign': 'left',
+                                                  'padding': '5px'}, style_header={'textAlign': 'center'})
         overview_discription = f'{current_value} has total of {total_publications} publications'
 
         if click_data or close_click:

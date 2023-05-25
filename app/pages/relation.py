@@ -110,9 +110,9 @@ relation_children = [
                 relation_chart,
                 dbc.Modal([
                 dbc.ModalHeader(id='paper_preview_title'),
-                dbc.ModalBody(className="modal-content-fullscreen", id='paper_preview_body'),
+                dbc.ModalBody(className="modal-content-fullscreen", id='paper_preview_body')
+                ], id="paper_preview", size="lg"),
                 dbc.CardBody(id='column_description_relation', children='', style={'background-color': 'lightgray'})
-            ], id="paper_preview", size="lg")
             ]
         )
         )

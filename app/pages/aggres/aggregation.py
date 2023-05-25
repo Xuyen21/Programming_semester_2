@@ -52,6 +52,7 @@ aggregation_tab = dcc.Tab(label="Aggregation", value="aggregation_tab")
 
 # define settings
 setting = html.Div(children=[
+
     dbc.Row(
         [
             dbc.Label('Top popularity'),

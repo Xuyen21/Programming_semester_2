@@ -1,4 +1,4 @@
-from dash import dcc, html
+from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 
 from components.filter_card import generate_filter_card
@@ -32,6 +32,15 @@ aggregation_form = html.Div([
                 ),
             ], id="modal", size="xl"),
         ]),
+        html.Div([
+            dbc.Modal([
+                dbc.ModalHeader(html.H5(id='data_table')),
+                dbc.ModalBody(id='data_table_content'),
+                dbc.ModalFooter(
+                    dbc.Button("Close", id="close-data-table-btn", className="ml-auto")
+                ),
+            ], id="data_table_modal", size="xl"),
+        ]),
     ])
 ])
 
@@ -42,13 +51,17 @@ aggregation_chart = dcc.Graph(id="aggregation_chart")
 aggregation_tab = dcc.Tab(label="Aggregation", value="aggregation_tab")
 
 # define settings
-setting = dbc.CardBody(children=[
-    html.P(f'top popularity'),
-    dcc.Slider(5, 20, 5, value=10, id='top_popularity_slider'),
-    # allow user to slide the popularity range, default value is top 10
-    dcc.Dropdown(['bar chart', 'pie chart'], placeholder='choose your preferable chart', value='bar chart',
-                 style={'margin-top': 10},
-                 id='chart_type'),  # different type of charts,  style={'margin-left': 5, "width": "18rem"},
+setting = html.Div(children=[
+    dbc.Row(
+        [
+            dbc.Label('Top popularity'),
+            dcc.Slider(5, 20, 5, value=10, id='top_popularity_slider'),
+            # allow user to slide the popularity range, default value is top 10
+            dcc.Dropdown(['bar chart', 'pie chart'], placeholder='choose your preferable chart', value='bar chart',
+                         style={'margin-top': 10},
+                         id='chart_type')
+        ]
+    )
 
 ])
 # define aggregation children
@@ -72,7 +85,6 @@ aggregation_children = dcc.Tab(label="Aggregation", children=[
                     )
                     )
                 ),
-
             ], id='diagram_display', width=10),
 
     ])

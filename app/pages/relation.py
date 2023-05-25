@@ -104,12 +104,18 @@ relation_children = [
         info_card
     ], width=2),
     dbc.Col(dbc.Card(
-        dbc.CardBody(
-            dcc.Loading(
-                type = "default",
-                children = [relation_chart, dbc.CardBody(id='column_description_relation', children='', style={'background-color': 'lightgray'})],
-            ),
-        ),
+        dbc.CardBody(dcc.Loading(
+            type = "default",
+            children = [
+                relation_chart,
+                dbc.Modal([
+                dbc.ModalHeader(id='paper_preview_title'),
+                dbc.ModalBody(className="modal-content-fullscreen", id='paper_preview_body'),
+                dbc.CardBody(id='column_description_relation', children='', style={'background-color': 'lightgray'})
+            ], id="paper_preview", size="lg")
+            ]
+        )
+        )
     ), width=10)
 ]
 

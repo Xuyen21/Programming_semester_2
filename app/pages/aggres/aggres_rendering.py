@@ -57,9 +57,9 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
         selected_columns: list[str] = [f'{selected_table}.name', 'sub_col.count']
 
         values = aggregate_column(
-            selected_columns, 
-            selected_table, 
-            "name", 
+            selected_columns,
+            selected_table,
+            "name",
             f'COUNT({selected_table}_{"id"})',
             limit=data_limit
         )

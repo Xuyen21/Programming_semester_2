@@ -9,9 +9,9 @@ import logging
 # https://github.com/jimmybow/visdcc
 from visdcc import Network
 import pandas as pd
-from dash import html, dcc, Input, Output, dash, State
+from dash import html, dcc, Input, Output, dash, State, Dash
 import dash_bootstrap_components as dbc
-
+from flask_caching import Cache
 # modules
 from modules.postgres import author_relations, school_relations, paper_date_title, paper_authors, paper_schools
 from modules.column_descriptions import get_column_description
@@ -120,7 +120,7 @@ relation_children = [
 ]
 
 # define relation_callback
-def relation_callback(app):
+def relation_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
     @app.callback(
         Output("relation_network", "data"),
         Output("column_description_relation", "children"),
@@ -128,6 +128,7 @@ def relation_callback(app):
         Input("relation_dropdown", "value"),
         Input("relation_limit_slider", "value")
     )
+    @cache.memoize(timeout=cache_timeout)
     def draw_relation_network(attribute: str, table: str, limit: int):
         if attribute is None or table is None or limit is None:
             return dash.no_update, dash.no_update

@@ -10,8 +10,10 @@ if os.getenv('VSCODE') == "True":
 
 import plotly.express as px
 
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, Dash
 import dash_bootstrap_components as dbc
+
+from flask_caching import Cache
 
 from app.components.filter_card import generate_filter_card
 from app.components.settings_card import generate_settings_card
@@ -65,12 +67,13 @@ timespan_children = [
 ]
 
 # define timespan_callbackcallback
-def timespan_callback(app):
+def timespan_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
     @app.callback(
         Output("timespan_chart", "figure"),
         Input("year_dropdown", "value"),
         Input("chart_type_dropdown", "value")
     )
+    @cache.memoize(timeout=cache_timeout)
     def draw_timespan(selected_year: str, chart_type: str):
         if not selected_year:
             selected_year = "2022"

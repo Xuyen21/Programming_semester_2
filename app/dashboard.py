@@ -3,11 +3,12 @@ from dash import dcc, Dash, html, Input, Output
 import dash_bootstrap_components as dbc
 from dash_bootstrap_components.themes import BOOTSTRAP
 
+from flask_caching import Cache
+
 from pages.aggres.aggregation import aggregation_children, aggregation_tab
 from pages.aggres.aggres_rendering import aggres_render
 from pages.relation import relation_tab, relation_children, relation_callback
 from pages.timespan import timespan_tab, timespan_children, timespan_callback
-
 
 # logging configuration
 logging.basicConfig(
@@ -36,6 +37,12 @@ app = Dash(
     assets_folder='assets' # to render the word_clouds image (aggregation part)
 )
 
+# cache configuration
+cache = Cache(app.server, config={
+    'CACHE_TYPE': 'filesystem',
+    'CACHE_DIR': './cache'
+})
+
 app.layout = html.Div(
         className="app-div",
         children=[
@@ -55,9 +62,9 @@ def render_content(tab_name: str):
 
 if __name__ == '__main__':
     # initialize callbacks from external files
-    aggres_render(app)
-    relation_callback(app)
-    timespan_callback(app)
+    aggres_render(app, cache)
+    relation_callback(app, cache)
+    timespan_callback(app, cache)
 
     # start app
     app.run(debug=True)

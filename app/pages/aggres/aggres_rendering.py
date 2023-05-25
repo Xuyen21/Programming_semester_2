@@ -1,11 +1,12 @@
 import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, State
+from flask_caching import Cache
 from modules.postgres import sql_from_dropdown
 from modules.column_descriptions import get_column_description
 
 
-def aggres_render(app: Dash):
+def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
     """
     In Aggregation tab in the navbar, user selects one column
     Returns: description of the chosen column and aggregations of the it in different type of charts
@@ -15,6 +16,7 @@ def aggres_render(app: Dash):
                   [Input("tabelle_dropdown", "value"), Input("chart_type", "value"),
                    Input("top_popularity_slider", "value")]
                   )
+    @cache.memoize(timeout=cache_timeout)
     # set author, and bar chart as default
     def draw_aggregation(selected_table: str = 'author', chart_type: str = 'bar chart', popularity_slider=10):
 

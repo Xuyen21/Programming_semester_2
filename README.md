@@ -1,4 +1,4 @@
-# Dashboard: dblp Datase
+# Dashboard: dblp Dataset
 ## Elements
 The file `docs/elements.json` provides an overview of the elements per category of the dataset.
 

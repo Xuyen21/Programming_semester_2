@@ -12,7 +12,7 @@ from pages.timespan import timespan_tab, timespan_children, timespan_callback
 # logging configuration
 logging.basicConfig(
     format='%(levelname)s : [%(filename)s:%(lineno)d] : %(message)s',
-    level=logging.DEBUG
+    level=logging.ERROR
 )
 logging.getLogger(__name__)
 

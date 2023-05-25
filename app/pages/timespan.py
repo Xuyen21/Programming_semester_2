@@ -12,27 +12,27 @@ import plotly.express as px
 
 from dash import dcc, html, Input, Output, Dash
 import dash_bootstrap_components as dbc
-
+import pandas as pd
 from flask_caching import Cache
 
 from app.components.filter_card import generate_filter_card
 from app.components.settings_card import generate_settings_card
 from app.components.info_card import info_card
 
-from app.modules.postgres import update_year_dropdown, papers_per_month
+from app.modules.postgres import execute_query
+from app.modules.postgres_queries import papers_per_month_query, update_year_dropdown_query
 
 # Define form
 timespan_form = html.Div([
     dbc.Row([
         dbc.Label("Table"),
         dcc.Dropdown(
-            options=update_year_dropdown(),
+            options=[{"label": str(year[0]), "value": str(year[0])} for year in execute_query(update_year_dropdown_query(), 'update_year_dropdown')],
             placeholder="Choose the year",
             id="year_dropdown",
             value ="2022"
         )
     ])
-
 ])
 
 # Define timespan_chart
@@ -68,6 +68,17 @@ timespan_children = [
 
 # define timespan_callbackcallback
 def timespan_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
+
+    # define sql request
+    @cache.memoize(timeout=cache_timeout)
+    def papers_per_month(year: str) -> pd.DataFrame:
+        sql_query = papers_per_month_query(year)
+
+        results = execute_query(sql_query, 'papers_per_month')
+        df = pd.DataFrame(results, columns=['month', 'entryType', 'count'])
+
+        return df
+
     @app.callback(
         Output("timespan_chart", "figure"),
         Input("year_dropdown", "value"),

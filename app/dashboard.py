@@ -40,7 +40,7 @@ app = Dash(
 # cache configuration
 cache = Cache(app.server, config={
     'CACHE_TYPE': 'filesystem',
-    'CACHE_DIR': './cache'
+    'CACHE_DIR': './.cache'
 })
 
 app.layout = html.Div(

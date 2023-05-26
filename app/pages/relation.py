@@ -4,8 +4,6 @@ This module is responsible for the relations tab of the DBLP Dashboard.
 Created by: Silvan Wiedmer
 Created at: 1.5.2023
 """
-import logging
-
 # https://github.com/jimmybow/visdcc
 from visdcc import Network
 import pandas as pd
@@ -13,7 +11,9 @@ from dash import html, dcc, Input, Output, dash, State, Dash
 import dash_bootstrap_components as dbc
 from flask_caching import Cache
 # modules
-from modules.postgres import author_relations, school_relations, paper_date_title, paper_authors, paper_schools
+from modules.postgres import execute_query
+from modules.postgres_queries import author_relations_query, school_relations_query
+from modules.postgres_queries import paper_date_title_query, paper_authors_query, paper_schools_query
 from modules.column_descriptions import get_column_description
 
 # dashboard components
@@ -63,9 +63,9 @@ def generate_network_relations(attribute: str, table: str, limit: int) -> dict:
     - dict: Relationship graph data
     """
     if attribute == "school":
-        relations_df = pd.DataFrame(school_relations(table, limit))
+        relations_df = pd.DataFrame(execute_query(school_relations_query(table, limit), 'school_relations_query'))
     else:
-        relations_df = pd.DataFrame(author_relations(table, limit))
+        relations_df = pd.DataFrame(execute_query(author_relations_query(table, limit), 'author_relations_query'))
 
     # generate nodes
     unique_entries = relations_df.iloc[:, 1].unique()
@@ -153,9 +153,9 @@ def relation_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
             return not is_open , dash.no_update, dash.no_update
 
         # get data from database
-        date_title: list[tuple] = paper_date_title(nodes[0])
-        authors: list[str] = [author[0] for author in paper_authors(nodes[0])]
-        schools: list[str] = [school[0] for school in paper_schools(nodes[0])]
+        date_title: list[tuple] = execute_query(paper_date_title_query(nodes[0]), 'paper_date_title_query')
+        authors: list[str] = [author[0] for author in execute_query(paper_authors_query(nodes[0]), 'paper_authors_query')]
+        schools: list[str] = [school[0] for school in execute_query(paper_schools_query(nodes[0]), 'paper_schools_query')]
 
         return not is_open, dbc.Row([
             dbc.Label(f'Date: {date_title[0][0]}'),

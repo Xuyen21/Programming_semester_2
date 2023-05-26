@@ -4,10 +4,10 @@ Description: This module is resposible for the connection to the postgres databa
 Created: 3.3.2023
 """
 import os
-from time import time
-from psycopg2 import connect, sql, errors
-from dotenv import load_dotenv
 import logging
+from time import time
+from psycopg2 import connect, errors
+from dotenv import load_dotenv
 
 # load environments from .env file
 load_dotenv()
@@ -30,17 +30,17 @@ def execute_query(query, name: str) -> list[tuple]:
     Parameters:
     - query: Any => The sql query to execute
     - name: str => The name of the query (used for debugging)
+    Return:
+    - list[tuple] => The results of the query
     """
     # execute query
     try:
-        t1 = time()
+        before = time()
         cursor.execute(query)
-        t2 = time()
-        logging.debug(f'{name} query took: {t2 - t1:.3} seconds')
-    except errors.SyntaxError as err:
-        logging.warning(err)
-    except Exception as err:
-        logging.error(err)
+        after = time()
+        logging.debug("%s query took: %s seconds", name, (round(after-before, 2)))
+    except errors.SyntaxError as error:
+        logging.warning(error)
 
     # return results
     return cursor.fetchall()

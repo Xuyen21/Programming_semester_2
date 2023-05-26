@@ -1,6 +1,4 @@
 # Dashboard: dblp Dataset
-This project is about exploring the dblp dataset using self developed tools and algorithms.
-
 ## Elements
 The file `docs/elements.json` provides an overview of the elements per category of the dataset.
 

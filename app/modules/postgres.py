@@ -15,17 +15,19 @@ load_dotenv()
 
 # postgress connection
 conn = connect(
-    database = os.getenv('DATABASE_NAME'),
-    host = "localhost",
-    user = os.getenv('POSTGRES_USER'),
-    password = os.getenv('POSTGRES_PASSWORD'),
+    database=os.getenv('DATABASE_NAME'),
+    host="localhost",
+    user=os.getenv('POSTGRES_USER'),
+    password=os.getenv('POSTGRES_PASSWORD'),
     port="5432"
 )
 
 # initialize database cursor
 cursor = conn.cursor()
 
-def sql_from_dropdown(select: list[str], table: str, group_by: str, order_by: str, order: bool = False, limit: int = 10) -> list[tuple]:
+
+def sql_from_dropdown(select: list[str], table: str, group_by: str, order_by: str, order: bool = False,
+                      limit: int = 10) -> list[tuple]:
     """
     This function gets the parameters provided by the dashboard, converts it to a sql query
     and returns the result as a list of tuples.
@@ -66,11 +68,11 @@ def sql_from_dropdown(select: list[str], table: str, group_by: str, order_by: st
         ORDER BY {order_by} {order} 
         LIMIT {limit}
         """).format(
-        entry_table = sql.Identifier(f'entry_{table}'),
-        table_id = sql.Identifier(f'{table}_id'),
-        order_by = sql.SQL(order_by),
-        order = sql.SQL("ASC" if order else "DESC"),
-        limit = sql.Literal(str(limit))
+        entry_table=sql.Identifier(f'entry_{table}'),
+        table_id=sql.Identifier(f'{table}_id'),
+        order_by=sql.SQL(order_by),
+        order=sql.SQL("ASC" if order else "DESC"),
+        limit=sql.Literal(str(limit))
     )
 
     # generate sql query
@@ -79,10 +81,10 @@ def sql_from_dropdown(select: list[str], table: str, group_by: str, order_by: st
         FROM ({sub}) as sub_col 
         LEFT JOIN {table} ON {on}
         """).format(
-        select = sql.SQL(",").join(map(sql.SQL, select)),
-        sub = sub_query,
-        table = sql.Identifier(table),
-        on = sql.SQL(f'sub_col.{table}_id = {table}.id')
+        select=sql.SQL(",").join(map(sql.SQL, select)),
+        sub=sub_query,
+        table=sql.Identifier(table),
+        on=sql.SQL(f'sub_col.{table}_id = {table}.id')
     )
 
     # execute query
@@ -99,6 +101,7 @@ def sql_from_dropdown(select: list[str], table: str, group_by: str, order_by: st
     # return results
     return cursor.fetchall()
 
+
 def table_column_names(table: str) -> list[tuple]:
     """
     This function gets the column names of the specified table.
@@ -112,9 +115,10 @@ def table_column_names(table: str) -> list[tuple]:
         raise TypeError("Table is not a str")
 
     # generate sql query
-    sql_query = sql.SQL('SELECT "table_name", "column_name" FROM information_schema."columns" WHERE "table_schema" = {schema} AND "table_name" = {table};').format(
-        schema = sql.Literal('public'),
-        table = sql.Literal(table)
+    sql_query = sql.SQL(
+        'SELECT "table_name", "column_name" FROM information_schema."columns" WHERE "table_schema" = {schema} AND "table_name" = {table};').format(
+        schema=sql.Literal('public'),
+        table=sql.Literal(table)
     )
 
     # execute query
@@ -123,8 +127,8 @@ def table_column_names(table: str) -> list[tuple]:
     # return results
     return cursor.fetchall()
 
-def author_relations(table: str, limit: int) -> list[tuple]:
 
+def author_relations(table: str, limit: int) -> list[tuple]:
     sub_query = sql.SQL("""
     (
         SELECT {select}
@@ -134,12 +138,12 @@ def author_relations(table: str, limit: int) -> list[tuple]:
         ORDER BY COUNT(entry_author.author_id) DESC
         LIMIT {limit}
     ) as sub_col"""
-    ).format(
-        select = sql.SQL(f'{table}.entry_key'),
-        table = sql.Identifier(table),
-        group_by = sql.SQL(f'{table}.entry_key'),
-        on = sql.SQL(f'{table}.entry_key'),
-        limit = sql.Literal(limit)
+                        ).format(
+        select=sql.SQL(f'{table}.entry_key'),
+        table=sql.Identifier(table),
+        group_by=sql.SQL(f'{table}.entry_key'),
+        on=sql.SQL(f'{table}.entry_key'),
+        limit=sql.Literal(limit)
     )
 
     # generate sql query
@@ -148,8 +152,8 @@ def author_relations(table: str, limit: int) -> list[tuple]:
         FROM {sub_query}
         LEFT JOIN entry_author ON sub_col.entry_key = entry_author.entry_key
         LEFT JOIN author ON entry_author.author_id = author.id;"""
-    ).format(
-        sub_query = sub_query
+                        ).format(
+        sub_query=sub_query
     )
 
     # execute query
@@ -166,8 +170,8 @@ def author_relations(table: str, limit: int) -> list[tuple]:
     # return results
     return cursor.fetchall()
 
-def school_relations(table: str, limit: int) -> list[tuple]:
 
+def school_relations(table: str, limit: int) -> list[tuple]:
     sub_query = sql.SQL("""
     (
         SELECT {select}
@@ -177,12 +181,12 @@ def school_relations(table: str, limit: int) -> list[tuple]:
         ORDER BY COUNT(entry_school.school_id) DESC
         LIMIT {limit}
     ) as sub_col"""
-    ).format(
-        select = sql.SQL(f'{table}.entry_key'),
-        table = sql.Identifier(table),
-        group_by = sql.SQL(f'{table}.entry_key'),
-        on = sql.SQL(f'{table}.entry_key'),
-        limit = sql.Literal(limit)
+                        ).format(
+        select=sql.SQL(f'{table}.entry_key'),
+        table=sql.Identifier(table),
+        group_by=sql.SQL(f'{table}.entry_key'),
+        on=sql.SQL(f'{table}.entry_key'),
+        limit=sql.Literal(limit)
     )
 
     # generate sql query
@@ -191,8 +195,8 @@ def school_relations(table: str, limit: int) -> list[tuple]:
         FROM {sub_query}
         LEFT JOIN entry_school ON sub_col.entry_key = entry_school.entry_key
         LEFT JOIN school ON entry_school.school_id = school.id;"""
-    ).format(
-        sub_query = sub_query
+                        ).format(
+        sub_query=sub_query
     )
 
     # execute query
@@ -320,6 +324,7 @@ def paper_schools(key: str) -> list[tuple]:
     # return results
     return cursor.fetchall()
 
+
 def update_year_dropdown():
     sql_query = """
     SELECT DISTINCT EXTRACT(YEAR FROM mdate) as year
@@ -330,6 +335,7 @@ def update_year_dropdown():
     years = cursor.fetchall()
     options = [{"label": str(year[0]), "value": str(year[0])} for year in years]
     return options
+
 
 def papers_per_month(year: str) -> pd.DataFrame:
     sub_query = sql.SQL("""
@@ -372,3 +378,43 @@ def papers_per_month(year: str) -> pd.DataFrame:
     df = pd.DataFrame(results, columns=['month', 'entryType', 'count'])
 
     return df
+
+
+def get_publications_table(name: str):
+    """
+
+    Args:
+        name: value of the point on graph where user cliked on
+
+    Returns: data of that chosen name, which contains year, title and url
+
+    """
+    query = sql.SQL("""
+  select y.name as year, t.name as title, u.name as ee from author a
+	join  entry_author ea on a.id = ea.author_id
+	join  entry_year ey on ey.entry_key = ea.entry_key
+	join year y on y.id = ey.year_id
+	join entry_title et on et.entry_key = ea.entry_key
+	join title t on t.id = et.title_id
+	join entry_ee eu on eu.entry_key = ea.entry_key
+	join ee u on u.id = eu.ee_id
+	where a.name={name} limit 10
+  """).format(name=sql.Literal(name))
+    # execute query
+    try:
+        t1 = time()
+        cursor.execute(query)
+        t2 = time()
+        logging.debug(f'author"s publications query took: {t2 - t1:.3} seconds')
+    except errors.SyntaxError as err:
+        logging.warning(err)
+    except Exception as err:
+        logging.error(err)
+    fetch_data_table = cursor.fetchall()
+    data_info = pd.DataFrame(fetch_data_table, columns=['Year', 'Title', 'Url'])
+    result = data_info.to_dict('records')
+    # print(result)
+    return result
+
+
+

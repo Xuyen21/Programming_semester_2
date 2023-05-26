@@ -32,6 +32,16 @@ aggregation_form = html.Div([
                 ),
             ], id="modal", size="xl"),
         ]),
+        # modal for data-table after user clicked on graph
+        html.Div([
+            dbc.Modal([
+                dbc.ModalHeader(html.H5(id='data_table')),
+                dbc.ModalBody(id='data_table_content'),
+                dbc.ModalFooter(
+                    dbc.Button("Close", id="close-data-table-btn", className="ml-auto")
+                ),
+            ], id="data_table_modal", size="xl"),
+        ]),
     ])
 ])
 
@@ -52,7 +62,7 @@ setting = html.Div(children=[
         placeholder='choose your preferable chart',
         value='bar chart',
         id='chart_type'
-    )  # different type of charts,  style={'margin-left': 5, "width": "18rem"},
+    )
 ])
 # define aggregation children
 aggregation_children = dcc.Tab(label="Aggregation", children=[

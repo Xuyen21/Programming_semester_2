@@ -79,7 +79,7 @@ def aggres_render(app: Dash):
         result = dash_table.DataTable(data_info,
                                       style_data={'height': 'auto', 'whiteSpace': 'normal', 'textAlign': 'left',
                                                   'padding': '5px'}, style_header={'textAlign': 'center'})
-        overview_discription = f'{current_value} has total of {total_publications} publications'
+        overview_discription = f'The top {data_limit} {selected_table}'
 
         if click_data or close_click:
             return not is_open, overview_discription, result

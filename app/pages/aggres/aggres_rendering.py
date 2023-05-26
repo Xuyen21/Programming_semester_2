@@ -35,7 +35,7 @@ def aggres_render(app: Dash):
         df = pd.DataFrame(values, columns=selected_columns)
         df = df.sort_values(by=[count], ascending=True)
 
-        chart_title = f'The {selected_table}s in top {data_limit} publications'
+        chart_title = f'The top {data_limit} {selected_table}'
         bar_chart = px.bar(df, x=name, y=count, title=chart_title)
         pie_chart = px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0], title=chart_title)
 
@@ -79,7 +79,7 @@ def aggres_render(app: Dash):
         result = dash_table.DataTable(data_info,
                                       style_data={'height': 'auto', 'whiteSpace': 'normal', 'textAlign': 'left',
                                                   'padding': '5px'}, style_header={'textAlign': 'center'})
-        overview_discription = f'The top {data_limit} {selected_table}'
+        overview_discription = f'{current_value} has a total of {total_publications} publications'
 
         if click_data or close_click:
             return not is_open, overview_discription, result

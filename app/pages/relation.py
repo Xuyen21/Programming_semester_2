@@ -13,10 +13,11 @@ from flask_caching import Cache
 # modules
 from modules.postgres import execute_query
 from modules.postgres_queries import author_relations_query, school_relations_query
-from modules.postgres_queries import paper_date_title_query, paper_authors_query, paper_schools_query
+from modules.postgres_queries import paper_date_title_query
+from modules.postgres_queries import paper_authors_query, paper_schools_query
 from modules.column_descriptions import get_column_description
 
-# dashboard components
+# components
 from components.filter_card import generate_filter_card
 from components.settings_card import generate_settings_card
 from components.info_card import info_card
@@ -63,14 +64,18 @@ def generate_network_relations(attribute: str, table: str, limit: int) -> dict:
     - dict: Relationship graph data
     """
     if attribute == "school":
-        relations_df = pd.DataFrame(execute_query(school_relations_query(table, limit), 'school_relations_query'))
+        relations_df_query = school_relations_query(table, limit)
+        relations_df = pd.DataFrame(execute_query(relations_df_query, 'school_relations_query'))
     else:
-        relations_df = pd.DataFrame(execute_query(author_relations_query(table, limit), 'author_relations_query'))
+        relations_df_query = author_relations_query(table, limit)
+        relations_df = pd.DataFrame(execute_query(relations_df_query, 'author_relations_query'))
 
     # generate nodes
     unique_entries = relations_df.iloc[:, 1].unique()
 
-    nodes: list[dict] = [{'id': author, 'label': author, 'color': '#79a9d1'} for author in unique_entries]
+    nodes: list[dict] = [
+        {'id': author, 'label': author, 'color': '#79a9d1'} for author in unique_entries
+    ]
 
     # generate edges
     unique_entries = relations_df.iloc[:, 0].unique()
@@ -112,7 +117,11 @@ relation_children = [
                 dbc.ModalHeader(id='paper_preview_title'),
                 dbc.ModalBody(className="modal-content-fullscreen", id='paper_preview_body')
                 ], id="paper_preview", size="lg"),
-                dbc.CardBody(id='column_description_relation', children='', style={'background-color': 'lightgray'})
+                dbc.CardBody(
+                    id='column_description_relation',
+                    children='',
+                    style={'background-color': 'lightgray'}
+                )
             ]
         )
         )
@@ -121,6 +130,13 @@ relation_children = [
 
 # define relation_callback
 def relation_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
+    """
+    This function creates the callback for the Relation Tab.
+    Parameters:
+    - app: Dash => The App instance
+    - cache: Cache => the cache of the Application
+    - cache_timeout: int = 600 => The timeout before clearing the cache
+    """
     @app.callback(
         Output("relation_network", "data"),
         Output("column_description_relation", "children"),
@@ -133,7 +149,9 @@ def relation_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
         if attribute is None or table is None or limit is None:
             return dash.no_update, dash.no_update
 
-        return generate_network_relations(attribute, table, limit), get_column_description(attribute)
+        network_relations: dict = generate_network_relations(attribute, table, limit)
+        column_descriptions: str = get_column_description(attribute)
+        return network_relations, column_descriptions
 
     @app.callback(
         Output("paper_preview", "is_open"),
@@ -153,9 +171,16 @@ def relation_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
             return not is_open , dash.no_update, dash.no_update
 
         # get data from database
-        date_title: list[tuple] = execute_query(paper_date_title_query(nodes[0]), 'paper_date_title_query')
-        authors: list[str] = [author[0] for author in execute_query(paper_authors_query(nodes[0]), 'paper_authors_query')]
-        schools: list[str] = [school[0] for school in execute_query(paper_schools_query(nodes[0]), 'paper_schools_query')]
+        date_title_query = paper_date_title_query(nodes[0])
+        date_title: list[tuple] = execute_query(date_title_query, 'paper_date_title_query')
+
+        authors_query = paper_authors_query(nodes[0])
+        authors: list[str] = [author[0] for author in execute_query(authors_query, 'paper_authors_query')]
+
+        schools_query = paper_schools_query(nodes[0])
+        schools: list[str] = [
+            school[0] for school in execute_query(schools_query, 'paper_schools_query')
+        ]
 
         return not is_open, dbc.Row([
             dbc.Label(f'Date: {date_title[0][0]}'),

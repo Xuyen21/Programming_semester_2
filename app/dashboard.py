@@ -62,9 +62,9 @@ def render_content(tab_name: str):
 
 if __name__ == '__main__':
     # initialize callbacks from external files
-    aggres_render(app, cache, 6000)
-    relation_callback(app, cache, 6000)
-    timespan_callback(app, cache, 6000)
+    aggres_render(app, cache, 3600)
+    relation_callback(app, cache, 3600)
+    timespan_callback(app, cache, 3600)
 
     # start app
     app.run(debug=True)

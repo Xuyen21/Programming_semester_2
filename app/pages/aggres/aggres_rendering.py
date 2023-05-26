@@ -13,8 +13,6 @@ def aggres_render(app: Dash):
     """
 
     @app.callback([Output("aggregation_chart", "figure"), Output("column_description_aggregation", "children")],
-                  # Output("top_popularity_slider", "value")],
-
                   [Input("tabelle_dropdown", "value"), Input("chart_type", "value"),
                    Input("top_popularity_slider", "value")]
                   )

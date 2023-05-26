@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 
 from dash import Dash, Input, Output, State, dash_table
-from modules.postgres import sql_from_dropdown, author_pubs
+from modules.postgres import sql_from_dropdown, get_publications_table
 from modules.column_descriptions import get_column_description
 
 
@@ -13,7 +13,7 @@ def aggres_render(app: Dash):
     """
 
     @app.callback([Output("aggregation_chart", "figure"), Output("column_description_aggregation", "children")],
-                   # Output("top_popularity_slider", "value")],
+                  # Output("top_popularity_slider", "value")],
 
                   [Input("tabelle_dropdown", "value"), Input("chart_type", "value"),
                    Input("top_popularity_slider", "value")]
@@ -38,18 +38,13 @@ def aggres_render(app: Dash):
         df = df.sort_values(by=[count], ascending=True)
 
         chart_title = f'The {selected_table}s in top {data_limit} publications'
-        # bar_chart = px.bar(df, x=name, y=count, title=chart_title)
-        # pie_chart = px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0], title=chart_title)
-        #
-        # if chart_type == 'bar chart':
-        #     return bar_chart, content
-        # if chart_type == 'pie chart':
-        #     return pie_chart, content
+        bar_chart = px.bar(df, x=name, y=count, title=chart_title)
+        pie_chart = px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0], title=chart_title)
 
         if chart_type == 'bar chart':
-            return px.bar(df, x=name, y=count, title=chart_title), content
+            return bar_chart, content
         if chart_type == 'pie chart':
-            return px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0], title=chart_title), content
+            return pie_chart, content
 
     # user click on the blue button, a modal of word_clouds image will be shown
     @app.callback(
@@ -82,7 +77,7 @@ def aggres_render(app: Dash):
         current_value = click_data['points'][0]['x']  # return name of the author/school... from dropdown
         total_publications = click_data['points'][0]['y']  # return number of publications
         # get data according to the chosen name
-        data_info = author_pubs(current_value)
+        data_info = get_publications_table(current_value)
         result = dash_table.DataTable(data_info,
                                       style_data={'height': 'auto', 'whiteSpace': 'normal', 'textAlign': 'left',
                                                   'padding': '5px'}, style_header={'textAlign': 'center'})

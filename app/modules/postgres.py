@@ -380,7 +380,7 @@ def papers_per_month(year: str) -> pd.DataFrame:
     return df
 
 
-def author_pubs(name: str):
+def get_publications_table(name: str):
     """
 
     Args:

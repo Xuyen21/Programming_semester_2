@@ -213,6 +213,117 @@ def school_relations(table: str, limit: int) -> list[tuple]:
     # return results
     return cursor.fetchall()
 
+def paper_date_title(key: str) -> list[tuple]:
+    """
+    This function gets the date and title of the paper with the given key.
+    Parameters:
+    - key: str => the paper key
+    Return:
+    - list[tuples] => the result of the query as list of tuples
+    """
+    # generate author sql query
+    sql_query = sql.SQL("""
+        SELECT sub_col."mdate", title."name"
+        FROM (
+            SELECT "key", mdate
+            FROM entry
+            WHERE "key" = {key}
+        ) AS sub_col
+        LEFT JOIN entry_title ON sub_col.key = entry_title.entry_key
+        LEFT JOIN title ON entry_title.title_id = title.id;
+        """
+    ).format(
+        key = sql.Literal(key)
+    )
+
+    # execute query
+    try:
+        t1 = time()
+        cursor.execute(sql_query)
+        t2 = time()
+        logging.debug(f'paper_preview query took: {t2 - t1:.3} seconds')
+    except errors.SyntaxError as err:
+        logging.warning(err)
+    except Exception as err:
+        logging.error(err)
+
+    # return results
+    return cursor.fetchall()
+
+def paper_authors(key: str) -> list[tuple]:
+    """
+    This function gets the authors of the paper with the given key.
+    Parameters:
+    - key: str => the paper key
+    Return:
+    - list[tuples] => the result of the query as list of tuples
+    """
+    # generate author sql query
+    sql_query = sql.SQL("""
+        SELECT author.name
+        FROM (
+            SELECT "key"
+            FROM entry
+            WHERE "key" = {key}
+        ) AS sub_col
+        LEFT JOIN entry_author ON sub_col.key = entry_author.entry_key
+        LEFT JOIN author ON entry_author.author_id = author.id;
+        """
+    ).format(
+        key = sql.Literal(key)
+    )
+
+    # execute query
+    try:
+        t1 = time()
+        cursor.execute(sql_query)
+        t2 = time()
+        logging.debug(f'paper_authors query took: {t2 - t1:.3} seconds')
+    except errors.SyntaxError as err:
+        logging.warning(err)
+    except Exception as err:
+        logging.error(err)
+
+    # return results
+    return cursor.fetchall()
+
+def paper_schools(key: str) -> list[tuple]:
+    """
+    This function gets the schools of the paper with the given key.
+    Parameters:
+    - key: str => the paper key
+    Return:
+    - list[tuples] => the result of the query as list of tuples
+    """
+    # generate author sql query
+    sql_query = sql.SQL("""
+        SELECT school.name
+        FROM (
+            SELECT "key"
+            FROM entry
+            WHERE "key" = {key}
+        ) AS sub_col
+        LEFT JOIN entry_school ON sub_col.key = entry_school.entry_key
+        LEFT JOIN school ON entry_school.school_id = school.id;
+        """
+    ).format(
+        key = sql.Literal(key)
+    )
+
+    # execute query
+    try:
+        t1 = time()
+        cursor.execute(sql_query)
+        t2 = time()
+        logging.debug(f'paper_schools query took: {t2 - t1:.3} seconds')
+    except errors.SyntaxError as err:
+        logging.warning(err)
+    except Exception as err:
+        logging.error(err)
+
+    # return results
+    return cursor.fetchall()
+
 
 def update_year_dropdown():
     sql_query = """

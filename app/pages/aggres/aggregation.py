@@ -1,4 +1,4 @@
-from dash import dcc, html, dash_table
+from dash import dcc, html
 import dash_bootstrap_components as dbc
 
 from components.filter_card import generate_filter_card
@@ -8,7 +8,7 @@ from components.info_card import info_card
 # define form
 aggregation_form = html.Div([
     dbc.Row([
-        dbc.Label("Tabelle"),
+        dbc.Label("Table"),
         dcc.Dropdown(
             ["author", "editor", "pages", "publisher", "school"],
             placeholder="Tabelle auswählen",
@@ -32,6 +32,7 @@ aggregation_form = html.Div([
                 ),
             ], id="modal", size="xl"),
         ]),
+        # modal for data-table after user clicked on graph
         html.Div([
             dbc.Modal([
                 dbc.ModalHeader(html.H5(id='data_table')),
@@ -52,18 +53,16 @@ aggregation_tab = dcc.Tab(label="Aggregation", value="aggregation_tab")
 
 # define settings
 setting = html.Div(children=[
-
-    dbc.Row(
-        [
-            dbc.Label('Top popularity'),
-            dcc.Slider(5, 20, 5, value=10, id='top_popularity_slider'),
-            # allow user to slide the popularity range, default value is top 10
-            dcc.Dropdown(['bar chart', 'pie chart'], placeholder='choose your preferable chart', value='bar chart',
-                         style={'margin-top': 10},
-                         id='chart_type')
-        ]
+    dbc.Label('Top popularity'),
+    dcc.Slider(5, 20, 5, value=10, id='top_popularity_slider'),
+    # allow user to slide the popularity range, default value is top 10
+    dbc.Label('Chart Type'),
+    dcc.Dropdown(
+        ['bar chart', 'pie chart'],
+        placeholder='choose your preferable chart',
+        value='bar chart',
+        id='chart_type'
     )
-
 ])
 # define aggregation children
 aggregation_children = dcc.Tab(label="Aggregation", children=[
@@ -74,18 +73,15 @@ aggregation_children = dcc.Tab(label="Aggregation", children=[
             info_card
         ], width=2),
 
-        dbc.Col(
-            [
-                dbc.Card(
-                    dbc.CardBody(dcc.Loading(
-                        type="default",
-                        children=aggregation_chart
-                    )
-                    )
-                ),
-                dbc.Card(
-                    dbc.CardBody(id='chart_content')) # show content of a particular column
-            ], id='diagram_display', width=10),
+        dbc.Col([
+            dbc.Card(
+                dbc.CardBody(dcc.Loading(
+                    type="default",
+                    children=[aggregation_chart, dbc.CardBody(id='column_description_aggregation', children='', style={'background-color': 'lightgray'})]
+                )
+                )
+            ),
+        ], id='diagram_display', width=10),
 
     ])
 ])

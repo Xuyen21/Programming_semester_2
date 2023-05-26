@@ -26,20 +26,11 @@ timespan_form = html.Div([
         dcc.Dropdown(
             options=update_year_dropdown(),
             placeholder="Choose the year",
-            id="year_dropdown"
-        )
-    ]),
-    dbc.Row([
-        dbc.Label("Chart Type"),
-        dcc.Dropdown(
-            options=[
-                {"label": "Bar Chart", "value": "bar"},
-                {"label": "Pie Chart", "value": "pie"}
-            ],
-            value="bar",
-            id="chart_type_dropdown"
+            id="year_dropdown",
+            value ="2022"
         )
     ])
+
 ])
 
 # Define timespan_chart
@@ -52,7 +43,18 @@ timespan_tab = dcc.Tab(label="Timespan", value="timespan_tab")
 timespan_children = [
     dbc.Col([
         generate_filter_card(timespan_form),
-        generate_settings_card(html.P("Not Implemented")),
+        generate_settings_card(
+    dbc.Row([
+        dbc.Label("Chart Type"),
+        dcc.Dropdown(
+            options=[
+                {"label": "Bar Chart", "value": "bar"},
+                {"label": "Pie Chart", "value": "pie"}
+            ],
+            value="bar",
+            id="chart_type_dropdown"
+        )
+    ])),
         info_card
     ], width=2),
     dbc.Col(dbc.Card(
@@ -76,7 +78,7 @@ def timespan_callback(app):
         df = papers_per_month(selected_year)
 
         if chart_type == "bar":
-            fig = px.bar(df, x='month', y='count', color='entryType', barmode='group')
+            fig = px.bar(df, x='month', y='count', color='entryType')
         elif chart_type == "pie":
             fig = px.pie(df, values='count', names='entryType')
 

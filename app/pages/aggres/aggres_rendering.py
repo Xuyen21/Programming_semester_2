@@ -1,9 +1,9 @@
 import pandas as pd
 import plotly.express as px
-from dash import dcc, Dash, html, Input, Output, dash, State, dash_table
+
+from dash import Dash, Input, Output, State, dash_table
 from modules.postgres import sql_from_dropdown, author_pubs
-from .aggres_contents import get_agres_contents
-import logging
+from modules.column_descriptions import get_column_description
 
 
 def aggres_render(app: Dash):
@@ -12,8 +12,9 @@ def aggres_render(app: Dash):
     Returns: description of the chosen column and aggregations of the it in different type of charts
     """
 
-    @app.callback([Output("aggregation_chart", "figure"), Output("chart_content", "children"),
-                   ],  # Output("top_popularity_slider", "value")
+    @app.callback([Output("aggregation_chart", "figure"), Output("column_description_aggregation", "children")],
+                   # Output("top_popularity_slider", "value")],
+
                   [Input("tabelle_dropdown", "value"), Input("chart_type", "value"),
                    Input("top_popularity_slider", "value")]
                   )
@@ -22,7 +23,7 @@ def aggres_render(app: Dash):
         # set data limit according to the slider in settings
         data_limit = popularity_slider
 
-        content = get_agres_contents(column_name=selected_table)
+        content = get_column_description(column_name=selected_table)
 
         selected_columns: list[str] = [f'{selected_table}.name', 'sub_col.count']
 
@@ -35,21 +36,20 @@ def aggres_render(app: Dash):
 
         df = pd.DataFrame(values, columns=selected_columns)
         df = df.sort_values(by=[count], ascending=True)
-        # print(df.head(3))
-        chart_title = f'The {selected_table}s in top {data_limit} publications'
 
-        logging.debug(df.head())
-        if df.empty:
-            return dash.no_update
-        # copy_df = df
-        # print('copy data: ',copy_df.head(3))
-        bar_chart = px.bar(df, x=name, y=count, title=chart_title)
-        pie_chart = px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0], title=chart_title)
+        chart_title = f'The {selected_table}s in top {data_limit} publications'
+        # bar_chart = px.bar(df, x=name, y=count, title=chart_title)
+        # pie_chart = px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0], title=chart_title)
+        #
+        # if chart_type == 'bar chart':
+        #     return bar_chart, content
+        # if chart_type == 'pie chart':
+        #     return pie_chart, content
 
         if chart_type == 'bar chart':
-            return bar_chart, content
+            return px.bar(df, x=name, y=count, title=chart_title), content
         if chart_type == 'pie chart':
-            return pie_chart, content
+            return px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0], title=chart_title), content
 
     # user click on the blue button, a modal of word_clouds image will be shown
     @app.callback(

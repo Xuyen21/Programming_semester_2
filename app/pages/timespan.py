@@ -94,7 +94,7 @@ def timespan_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
         if chart_type == "bar":
             fig = px.bar(df, x='month', y='count', color='entryType')
         elif chart_type == "pie":
-            fig = px.pie(df, values='count', names='entryType')
+            fig = px.pie(df, values='count', names='entryType',color='entryType')
 
         fig.update_layout(
             xaxis_title="Month",

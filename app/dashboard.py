@@ -1,3 +1,7 @@
+"""
+This it the main Python file of the DBLP Dashboard.
+It creates the Dash instance and loads all the required resources.
+"""
 import logging
 from dash import dcc, Dash, html, Input, Output
 import dash_bootstrap_components as dbc
@@ -11,9 +15,11 @@ from pages.relation import relation_tab, relation_children, relation_callback
 from pages.timespan import timespan_tab, timespan_children, timespan_callback
 
 # logging configuration
+# https://stackoverflow.com/questions/73882299/python-logging-messages-not-showing-up-due-to-imports
 logging.basicConfig(
     format='%(levelname)s : [%(filename)s:%(lineno)d] : %(message)s',
-    level=logging.ERROR
+    level=logging.ERROR,
+    force=True # needed due to override of logging.debug
 )
 logging.getLogger(__name__)
 
@@ -57,7 +63,14 @@ app.layout = html.Div(
     Output('content', 'children'),
     Input('tabs', 'value')
 )
-def render_content(tab_name: str):
+def render_content(tab_name: str) -> dcc.Tab:
+    """
+    This function renders the required Tab.
+    Parameters:
+    - tab_name: str => Name of the tab to load
+    Return:
+    - dcc.Tab => The tab to load
+    """
     return TABS.get(tab_name, aggregation_children)
 
 if __name__ == '__main__':

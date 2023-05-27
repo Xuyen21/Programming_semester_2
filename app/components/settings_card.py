@@ -5,7 +5,7 @@ def generate_settings_card(settings):
     settings_card = dbc.Card(
         dbc.CardBody(
             [
-                html.H5("Settings"),
+                html.H4("Settings"),
                 settings
             ]
         )

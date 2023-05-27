@@ -73,15 +73,22 @@ def publications_table_query(name: str) -> sql.Composed:
     Returns: data of that chosen name, which contains year, title and url
     """
     sql_query = sql.SQL("""
-        select y.name as year, t.name as title, u.name as ee from author a
-        join  entry_author ea on a.id = ea.author_id
-        join  entry_year ey on ey.entry_key = ea.entry_key
-        join year y on y.id = ey.year_id
-        join entry_title et on et.entry_key = ea.entry_key
-        join title t on t.id = et.title_id
-        join entry_ee eu on eu.entry_key = ea.entry_key
-        join ee u on u.id = eu.ee_id
-        where a.name={name} limit 10
+        SELECT "year".name AS "year", title.name AS "title", ee.name AS "ee"
+        FROM (
+            SELECT "id"
+            FROM author
+            WHERE "name" = 'Dacheng Tao'
+        ) AS sub_col
+        LEFT JOIN entry_author ON sub_col.id = entry_author.author_id
+        LEFT JOIN entry_year ON entry_year.entry_key = entry_author.entry_key
+        LEFT JOIN "year" ON "year".id = entry_year.year_id
+        LEFT JOIN entry_title ON entry_title.entry_key = entry_author.entry_key
+        LEFT JOIN title ON title.id = entry_title.title_id
+        LEFT JOIN entry_ee ON entry_ee.entry_key = entry_author.entry_key
+        LEFT JOIN ee ON ee.id = entry_ee.ee_id
+        WHERE "year" IS NOT null
+        ORDER BY "year" DESC
+        LIMIT 10;
     """).format(name=sql.Literal(name))
 
     return sql_query

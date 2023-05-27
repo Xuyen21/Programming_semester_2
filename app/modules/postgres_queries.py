@@ -77,7 +77,7 @@ def publications_table_query(name: str) -> sql.Composed:
         FROM (
             SELECT "id"
             FROM author
-            WHERE "name" = 'Dacheng Tao'
+            WHERE "name" = {name}
         ) AS sub_col
         LEFT JOIN entry_author ON sub_col.id = entry_author.author_id
         LEFT JOIN entry_year ON entry_year.entry_key = entry_author.entry_key

@@ -1,12 +1,9 @@
 import pandas as pd
 import plotly.express as px
-from dash import Dash, Input, Output, State
+from dash import Dash, Input, Output, State, dash_table, dash
 from flask_caching import Cache
 from modules.postgres import execute_query
-from modules.postgres_queries import aggregate_column_query
-
-from dash import Dash, Input, Output, State, dash_table
-from modules.postgres import get_publications_table
+from modules.postgres_queries import aggregate_column_query, publications_table_query
 from modules.column_descriptions import get_column_description
 
 def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
@@ -49,7 +46,7 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
     )
     @cache.memoize(timeout=cache_timeout)
     # set author, and bar chart as default
-    def draw_aggregation(selected_table: str = 'author', chart_type: str = 'bar chart', popularity_slider=10):
+    def draw_aggregation(selected_table: str='author', chart_type: str='bar chart', popularity_slider=10):
         # set data limit according to the slider in settings
         data_limit = popularity_slider
 
@@ -69,12 +66,12 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
         name = selected_columns[0]
         count = selected_columns[1]
 
-        df = pd.DataFrame(values, columns=selected_columns)
-        df = df.sort_values(by=[count], ascending=True)
+        df_aggreg = pd.DataFrame(values, columns=selected_columns)
+        df_aggreg = df_aggreg.sort_values(by=[count], ascending=True)
 
         chart_title = f'The top {data_limit} {selected_table}'
-        bar_chart = px.bar(df, x=name, y=count, title=chart_title)
-        pie_chart = px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0], title=chart_title)
+        bar_chart = px.bar(df_aggreg, x=name, y=count, title=chart_title)
+        pie_chart = px.pie(values=df_aggreg.iloc[:, 1], names=df_aggreg.iloc[:, 0], title=chart_title)
 
         if chart_type == 'bar chart':
             return bar_chart, content
@@ -98,10 +95,19 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
         return is_open
 
     # user click on a certain point in graph, the info will be shown accordinglly
-    @app.callback([Output("data_table_modal", "is_open"), Output('data_table', 'children'),
-                   Output('data_table_content', 'children')],
-                  [Input("aggregation_chart", "clickData"), Input('close-data-table-btn', "n_clicks")],
-                  State("data_table_modal", "is_open"))
+    @app.callback(
+        [
+            Output("data_table_modal", "is_open"),
+            Output('data_table', 'children'),
+            Output('data_table_content', 'children')
+        ],
+        [
+            Input("aggregation_chart", "clickData"),
+            Input('close-data-table-btn', "n_clicks")
+        ],
+        State("data_table_modal", "is_open")
+    )
+    @cache.memoize(timeout=cache_timeout)
     def show_data_table(click_data, close_click, is_open):
         """
 
@@ -113,14 +119,30 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
         Returns: 10 latest publications of that author/school.. which contains year, title and the url
 
         """
+        if click_data is None:
+            return dash.no_update
 
-        current_value = click_data['points'][0]['x']  # return name of the author/school... from dropdown
+        current_value = click_data['points'][0]['x']  # return name from dropdown
         total_publications = click_data['points'][0]['y']  # return number of publications
-        # get data according to the chosen name
-        data_info = get_publications_table(current_value)
-        result = dash_table.DataTable(data_info,
-                                      style_data={'height': 'auto', 'whiteSpace': 'normal', 'textAlign': 'left',
-                                                  'padding': '5px'}, style_header={'textAlign': 'center'})
+
+        # request data
+        publications_query = execute_query(
+            publications_table_query(current_value),
+            'publications_table_query'
+        )
+        data_info = pd.DataFrame(publications_query, columns=['Year', 'Title', 'Url'])
+        result = dash_table.DataTable(
+            data_info.to_dict('records'),
+            style_data={
+                'height': 'auto',
+                'whiteSpace': 'normal',
+                'textAlign': 'left',
+                'padding': '5px'
+            },
+            style_header={
+                'textAlign': 'center'
+            }
+        )
         overview_discription = f'{current_value} has a total of {total_publications} publications'
 
         if click_data or close_click:

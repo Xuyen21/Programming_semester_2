@@ -80,4 +80,4 @@ if __name__ == '__main__':
     timespan_callback(app, cache, 3600)
 
     # start app
-    app.run(debug=True)
+    app.run(debug=False)

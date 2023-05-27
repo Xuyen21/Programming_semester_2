@@ -92,9 +92,10 @@ def timespan_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
         else:
             fig = px.bar(df_papers, x='month', y='count', color='entryType')
 
+        # https://dblp.org/faq/16154937.html
         fig.update_layout(
             xaxis_title="Month",
-            yaxis_title="Number of publications",
+            yaxis_title="Number of modifications",
         )
 
         return fig

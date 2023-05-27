@@ -4,6 +4,9 @@ from dash import Dash, Input, Output, State
 from flask_caching import Cache
 from modules.postgres import execute_query
 from modules.postgres_queries import aggregate_column_query
+
+from dash import Dash, Input, Output, State, dash_table
+from modules.postgres import get_publications_table
 from modules.column_descriptions import get_column_description
 
 def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
@@ -36,8 +39,7 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
     @app.callback(
         [
             Output("aggregation_chart", "figure"),
-            Output("column_description_aggregation", "children"),
-            Output("top_popularity_slider", "value")
+            Output("column_description_aggregation", "children")
         ],
         [
             Input("tabelle_dropdown", "value"),
@@ -48,8 +50,8 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
     @cache.memoize(timeout=cache_timeout)
     # set author, and bar chart as default
     def draw_aggregation(selected_table: str = 'author', chart_type: str = 'bar chart', popularity_slider=10):
-
-        data_limit = round(popularity_slider)
+        # set data limit according to the slider in settings
+        data_limit = popularity_slider
 
         content = get_column_description(column_name=selected_table)
 
@@ -70,12 +72,16 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
         df = pd.DataFrame(values, columns=selected_columns)
         df = df.sort_values(by=[count], ascending=True)
 
-        if chart_type == 'bar chart':
-            return px.bar(df, x=name, y=count), content, popularity_slider
-        if chart_type == 'pie chart':
-            return px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0]), content, popularity_slider
+        chart_title = f'The top {data_limit} {selected_table}'
+        bar_chart = px.bar(df, x=name, y=count, title=chart_title)
+        pie_chart = px.pie(values=df.iloc[:, 1], names=df.iloc[:, 0], title=chart_title)
 
-    # user clicked button, a modal of word_clouds image will be shown
+        if chart_type == 'bar chart':
+            return bar_chart, content
+        if chart_type == 'pie chart':
+            return pie_chart, content
+
+    # user click on the blue button, a modal of word_clouds image will be shown
     @app.callback(
         Output("modal", "is_open"),
         [
@@ -89,4 +95,34 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
     def toggle_modal(open_clicks, close_clicks, is_open):
         if open_clicks or close_clicks:
             return not is_open
+        return is_open
+
+    # user click on a certain point in graph, the info will be shown accordinglly
+    @app.callback([Output("data_table_modal", "is_open"), Output('data_table', 'children'),
+                   Output('data_table_content', 'children')],
+                  [Input("aggregation_chart", "clickData"), Input('close-data-table-btn', "n_clicks")],
+                  State("data_table_modal", "is_open"))
+    def show_data_table(click_data, close_click, is_open):
+        """
+
+        Args:
+            click_data: get the value from the point where user clicked on
+            close_click: check if user clicked on a close button
+            is_open:  check if user clicked on a  certain point of the graph
+
+        Returns: 10 latest publications of that author/school.. which contains year, title and the url
+
+        """
+
+        current_value = click_data['points'][0]['x']  # return name of the author/school... from dropdown
+        total_publications = click_data['points'][0]['y']  # return number of publications
+        # get data according to the chosen name
+        data_info = get_publications_table(current_value)
+        result = dash_table.DataTable(data_info,
+                                      style_data={'height': 'auto', 'whiteSpace': 'normal', 'textAlign': 'left',
+                                                  'padding': '5px'}, style_header={'textAlign': 'center'})
+        overview_discription = f'{current_value} has a total of {total_publications} publications'
+
+        if click_data or close_click:
+            return not is_open, overview_discription, result
         return is_open

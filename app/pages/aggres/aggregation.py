@@ -25,21 +25,14 @@ aggregation_form = html.Div([
                 dbc.ModalBody([
                     html.Img(src='/assets/word_clouds.png',
                              style={"width": "100%", "height": "100%", "object-fit": "contain"}),
-                ], className="modal-content-fullscreen"),
-
-                dbc.ModalFooter(
-                    dbc.Button("Close", id="close-button", className="ml-auto")
-                ),
+                ], className="modal-content-fullscreen")
             ], id="modal", size="xl"),
         ]),
         # modal for data-table after user clicked on graph
         html.Div([
             dbc.Modal([
                 dbc.ModalHeader(html.H5(id='data_table')),
-                dbc.ModalBody(id='data_table_content'),
-                dbc.ModalFooter(
-                    dbc.Button("Close", id="close-data-table-btn", className="ml-auto")
-                ),
+                dbc.ModalBody(id='data_table_content')
             ], id="data_table_modal", size="xl"),
         ]),
     ])
@@ -52,17 +45,19 @@ aggregation_chart = dcc.Graph(id="aggregation_chart")
 aggregation_tab = dcc.Tab(label="Aggregation", value="aggregation_tab")
 
 # define settings
-setting = html.Div(children=[
-    dbc.Label('Top popularity'),
-    dcc.Slider(5, 20, 5, value=10, id='top_popularity_slider'),
-    # allow user to slide the popularity range, default value is top 10
-    dbc.Label('Chart Type'),
-    dcc.Dropdown(
-        ['bar chart', 'pie chart'],
-        placeholder='choose your preferable chart',
-        value='bar chart',
-        id='chart_type'
-    )
+setting = html.Div([
+    dbc.Row([
+        dbc.Label('Top popularity'),
+        dcc.Slider(5, 20, 5, value=10, id='top_popularity_slider'),
+        # allow user to slide the popularity range, default value is top 10
+        dbc.Label('Chart Type'),
+        dcc.Dropdown(
+            ['bar chart', 'pie chart'],
+            placeholder='choose your preferable chart',
+            value='bar chart',
+            id='chart_type'
+        )
+    ])
 ])
 # define aggregation children
 aggregation_children = dcc.Tab(label="Aggregation", children=[

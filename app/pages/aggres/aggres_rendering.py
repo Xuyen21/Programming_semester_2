@@ -2,6 +2,8 @@ import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, State, dash_table, dash
 from flask_caching import Cache
+
+# modules
 from modules.postgres import execute_query
 from modules.postgres_queries import aggregate_column_query, publications_table_query
 from modules.column_descriptions import get_column_description
@@ -82,17 +84,18 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
     @app.callback(
         Output("modal", "is_open"),
         [
-            Input("word_clouds_btn", "n_clicks"),
-            Input("close-button", "n_clicks")
+            Input("word_clouds_btn", "n_clicks")
         ],
         [
             State("modal", "is_open")
         ],
     )
-    def toggle_modal(open_clicks, close_clicks, is_open):
-        if open_clicks or close_clicks:
-            return not is_open
-        return is_open
+    def toggle_modal(open_clicks, is_open):
+        # when first initialized => don't open
+        if open_clicks == 0:
+            return False
+
+        return not is_open
 
     # user click on a certain point in graph, the info will be shown accordinglly
     @app.callback(
@@ -103,12 +106,11 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
         ],
         [
             Input("aggregation_chart", "clickData"),
-            Input('close-data-table-btn', "n_clicks")
         ],
         State("data_table_modal", "is_open")
     )
     @cache.memoize(timeout=cache_timeout)
-    def show_data_table(click_data, close_click, is_open):
+    def show_data_table(click_data, is_open):
         """
 
         Args:
@@ -120,7 +122,7 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
 
         """
         if click_data is None:
-            return dash.no_update
+            return False, dash.no_update, dash.no_update
 
         current_value = click_data['points'][0]['x']  # return name from dropdown
         total_publications = click_data['points'][0]['y']  # return number of publications
@@ -145,6 +147,4 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
         )
         overview_discription = f'{current_value} has a total of {total_publications} publications'
 
-        if click_data or close_click:
-            return not is_open, overview_discription, result
-        return is_open
+        return not is_open, overview_discription, result

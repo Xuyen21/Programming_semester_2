@@ -246,52 +246,37 @@ def paper_schools_query(key: str) -> sql.Composed:
     return sql_query
 
 # Timespan
-def papers_per_month_query(year: str) -> sql.Composed:
+def papers_per_year_query() -> sql.SQL:
     """
     This function gets the published papers per month of the specified year
-    Parameters:
-    - year: str => the selected year
     Return:
-    - sql.Composed => the resulting query
+    - sql.SQL => the resulting query
     """
-    sub_query = sql.SQL("""
-        SELECT entry_key, 'phdthesis' as entryType
-        FROM phdthesis
-        UNION
-        SELECT entry_key, 'mastersthesis' as entryType
-        FROM mastersthesis
-        UNION
-        SELECT entry_key, 'article' as entryType
-        FROM article
-        UNION
-        SELECT entry_key, 'book' as entryType
-        FROM book
-    """)
 
     sql_query = sql.SQL("""
-        SELECT DATE_TRUNC('month', e.mdate) as month, n.entryType, COUNT(n.entryType)
-        FROM entry e
-        JOIN ({sub_query}) n ON e.key = n.entry_key
-        WHERE EXTRACT(YEAR FROM e.mdate) = {year}
-        GROUP BY month, n.entryType
-        ORDER BY month
-    """).format(
-        sub_query=sub_query,
-        year=sql.Literal(year)
-    )
-
-    return sql_query
-
-def update_year_dropdown_query() -> sql.SQL:
-    """
-    This function get's the available years from the database.
-    Return:
-    - sql.Composed => the resulting query
-    """
-    sql_query: sql.SQL = sql.SQL("""
-    SELECT DISTINCT EXTRACT(YEAR FROM mdate) as year
-    FROM entry
-    WHERE EXTRACT(YEAR FROM mdate) != EXTRACT(YEAR FROM NOW())
+        SELECT m.entry_key, 'mastersthesis' as entryType, y."name" as year
+        FROM mastersthesis m
+        LEFT JOIN entry e ON m.entry_key = e."key"
+        LEFT JOIN entry_year ey ON ey.entry_key = e."key"
+        LEFT JOIN "year" y ON y.id = ey.year_id
+        UNION
+        SELECT p.entry_key, 'phdthesis' as entryType, y."name" as year
+        FROM phdthesis p
+        LEFT JOIN entry e ON p.entry_key = e."key"
+        LEFT JOIN entry_year ey ON ey.entry_key = e."key"
+        LEFT JOIN "year" y ON y.id = ey.year_id
+        UNION
+        SELECT a.entry_key, 'article' as entryType, y."name" as year
+        FROM article a
+        LEFT JOIN entry e ON a.entry_key = e."key"
+        LEFT JOIN entry_year ey ON ey.entry_key = e."key"
+        LEFT JOIN "year" y ON y.id = ey.year_id
+        UNION
+        SELECT b.entry_key, 'book' as entryType, y."name" as year
+        FROM book b
+        LEFT JOIN entry e ON b.entry_key = e."key"
+        LEFT JOIN entry_year ey ON ey.entry_key = e."key"
+        LEFT JOIN "year" y ON y.id = ey.year_id
     """)
 
     return sql_query

@@ -9,7 +9,7 @@ from flask_caching import Cache
 
 # modules
 from modules.postgres import execute_query
-from modules.postgres_queries import papers_per_month_query, update_year_dropdown_query
+from modules.postgres_queries import papers_per_year_query
 
 # components
 from components.filter_card import generate_filter_card
@@ -19,15 +19,7 @@ from components.info_card import info_card
 # Define form
 timespan_form = html.Div([
     dbc.Row([
-        dbc.Label("Table"),
-        dcc.Dropdown(
-            options=[
-                {"label": str(year[0]), "value": str(year[0])} for year in execute_query(update_year_dropdown_query(), 'update_year_dropdown')
-            ],
-            placeholder="Choose the year",
-            id="year_dropdown",
-            value ="2022"
-        )
+        html.P("No Filter available")
     ])
 ])
 
@@ -55,11 +47,21 @@ timespan_children = [
     ])),
         info_card
     ], width=2),
-    dbc.Col(dbc.Card(
-        dbc.CardBody(dcc.Loading(
-            type="default",
-            children=timespan_chart))
-    ), width=10)
+    dbc.Col(
+        dbc.Card(
+            dbc.CardBody(
+                dcc.Loading(
+                    type="default",
+                    children=timespan_chart
+                )
+            ),
+            style={
+                'margin': '10px', 
+                'box-shadow': 'rgba(0,0,0,0.35) 0px 5px 5px'
+            }
+        ),
+        width=10
+    )
 ]
 
 # define timespan_callbackcallback
@@ -67,35 +69,31 @@ def timespan_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
 
     # define sql request
     @cache.memoize(timeout=cache_timeout)
-    def papers_per_month(year: str) -> pd.DataFrame:
-        sql_query = papers_per_month_query(year)
+    def papers_per_year() -> pd.DataFrame:
+        sql_query = papers_per_year_query()
 
-        results = execute_query(sql_query, 'papers_per_month')
-        df_papers = pd.DataFrame(results, columns=['month', 'entryType', 'count'])
+        results = execute_query(sql_query, 'papers_per_year')
+        df_papers = pd.DataFrame(results, columns=['entry_key', 'entryType', 'year'])
 
         return df_papers
 
     @app.callback(
         Output("timespan_chart", "figure"),
-        Input("year_dropdown", "value"),
         Input("chart_type_dropdown", "value")
     )
     @cache.memoize(timeout=cache_timeout)
-    def draw_timespan(selected_year: str, chart_type: str):
-        if not selected_year:
-            selected_year = "2022"
-
-        df_papers = papers_per_month(selected_year)
+    def draw_timespan(chart_type: str):
+        df_papers = papers_per_year()
+        grouped_df = df_papers.groupby(['year', 'entryType']).size().reset_index(name='count')
 
         if chart_type == "pie":
-            fig = px.pie(df_papers, values='count', names='entryType',color='entryType')
+            fig = px.pie(grouped_df, values='count', names='entryType', title='Publications over the years', color='entryType')
         else:
-            fig = px.bar(df_papers, x='month', y='count', color='entryType')
+            fig = px.bar(grouped_df, x='year', y='count', color='entryType')
 
-        # https://dblp.org/faq/16154937.html
         fig.update_layout(
-            xaxis_title="Month",
-            yaxis_title="Number of modifications",
+            xaxis_title="Year",
+            yaxis_title="Number of Publications",
         )
 
         return fig

@@ -23,7 +23,7 @@ aggregation_form = html.Div([
             dbc.Modal([
                 dbc.ModalHeader("Explore the frequency of keywords in title"),
                 dbc.ModalBody([
-                    html.Img(src='/assets/word_clouds.png',
+                    html.Img(src='assets/word_clouds.png',
                              style={"width": "100%", "height": "100%", "object-fit": "contain"}),
                 ], className="modal-content-fullscreen")
             ], id="modal", size="xl"),

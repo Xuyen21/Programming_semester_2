@@ -39,8 +39,7 @@ app_layout = dcc.Tabs([
 app = Dash(
     name = "DBLP Dashboard",
     title = "Welcome to DBLP",
-    external_stylesheets=[BOOTSTRAP],
-    assets_folder='assets' # to render the word_clouds image (aggregation part)
+    external_stylesheets=[BOOTSTRAP]
 )
 
 # cache configuration

@@ -70,11 +70,16 @@ aggregation_children = dcc.Tab(label="Aggregation", children=[
 
         dbc.Col([
             dbc.Card(
-                dbc.CardBody(dcc.Loading(
-                    type="default",
-                    children=[aggregation_chart, dbc.CardBody(id='column_description_aggregation', children='', style={'background-color': 'lightgray'})]
-                )
-                )
+                dbc.CardBody(
+                    dcc.Loading(
+                        type="default",
+                        children=[aggregation_chart, dbc.CardBody(id='column_description_aggregation', children='', style={'background-color': 'lightgray'})]
+                    )
+                ),
+                style={
+                    'margin': '10px', 
+                    'box-shadow': 'rgba(0,0,0,0.35) 0px 5px 5px'
+                }
             ),
         ], id='diagram_display', width=10),
 

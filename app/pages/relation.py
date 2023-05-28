@@ -108,24 +108,32 @@ relation_children = [
         generate_settings_card(relation_settings),
         info_card
     ], width=2),
-    dbc.Col(dbc.Card(
-        dbc.CardBody(dcc.Loading(
-            type = "default",
-            children = [
-                relation_chart,
-                dbc.Modal([
-                dbc.ModalHeader(id='paper_preview_title'),
-                dbc.ModalBody(className="modal-content-fullscreen", id='paper_preview_body')
-                ], id="paper_preview", size="lg"),
-                dbc.CardBody(
-                    id='column_description_relation',
-                    children='',
-                    style={'background-color': 'lightgray'}
+    dbc.Col(
+        dbc.Card(
+            dbc.CardBody(
+                dcc.Loading(
+                    type = "default",
+                    children = [
+                        relation_chart,
+                        dbc.Modal([
+                        dbc.ModalHeader(id='paper_preview_title'),
+                        dbc.ModalBody(className="modal-content-fullscreen", id='paper_preview_body')
+                        ], id="paper_preview", size="lg"),
+                        dbc.CardBody(
+                            id='column_description_relation',
+                            children='',
+                            style={'background-color': 'lightgray'}
+                        )
+                    ]
                 )
-            ]
-        )
-        )
-    ), width=10)
+            ),
+            style={
+                'margin': '10px', 
+                'box-shadow': 'rgba(0,0,0,0.35) 0px 5px 5px'
+            }
+        ),
+        width=10
+    )
 ]
 
 # define relation_callback

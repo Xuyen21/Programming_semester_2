@@ -8,7 +8,11 @@ def generate_filter_card(form):
                 html.H4("Filter", className="card-title"),
                 form
             ]
-        )
+        ),
+        style={
+            'margin': '10px', 
+            'box-shadow': 'rgba(0,0,0,0.35) 0px 5px 5px'
+        }
     )
 
     return filter_card

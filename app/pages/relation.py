@@ -4,19 +4,20 @@ This module is responsible for the relations tab of the DBLP Dashboard.
 Created by: Silvan Wiedmer
 Created at: 1.5.2023
 """
-import logging
-
 # https://github.com/jimmybow/visdcc
 from visdcc import Network
 import pandas as pd
-from dash import html, dcc, Input, Output, dash, State
+from dash import html, dcc, Input, Output, dash, State, Dash
 import dash_bootstrap_components as dbc
-
+from flask_caching import Cache
 # modules
-from modules.postgres import author_relations, school_relations, paper_date_title, paper_authors, paper_schools
+from modules.postgres import execute_query
+from modules.postgres_queries import author_relations_query, school_relations_query
+from modules.postgres_queries import paper_date_title_query
+from modules.postgres_queries import paper_authors_query, paper_schools_query
 from modules.column_descriptions import get_column_description
 
-# dashboard components
+# components
 from components.filter_card import generate_filter_card
 from components.settings_card import generate_settings_card
 from components.info_card import info_card
@@ -63,14 +64,18 @@ def generate_network_relations(attribute: str, table: str, limit: int) -> dict:
     - dict: Relationship graph data
     """
     if attribute == "school":
-        relations_df = pd.DataFrame(school_relations(table, limit))
+        relations_df_query = school_relations_query(table, limit)
+        relations_df = pd.DataFrame(execute_query(relations_df_query, 'school_relations_query'))
     else:
-        relations_df = pd.DataFrame(author_relations(table, limit))
+        relations_df_query = author_relations_query(table, limit)
+        relations_df = pd.DataFrame(execute_query(relations_df_query, 'author_relations_query'))
 
     # generate nodes
     unique_entries = relations_df.iloc[:, 1].unique()
 
-    nodes: list[dict] = [{'id': author, 'label': author, 'color': '#79a9d1'} for author in unique_entries]
+    nodes: list[dict] = [
+        {'id': author, 'label': author, 'color': '#79a9d1'} for author in unique_entries
+    ]
 
     # generate edges
     unique_entries = relations_df.iloc[:, 0].unique()
@@ -103,24 +108,43 @@ relation_children = [
         generate_settings_card(relation_settings),
         info_card
     ], width=2),
-    dbc.Col(dbc.Card(
-        dbc.CardBody(dcc.Loading(
-            type = "default",
-            children = [
-                relation_chart,
-                dbc.Modal([
-                dbc.ModalHeader(id='paper_preview_title'),
-                dbc.ModalBody(className="modal-content-fullscreen", id='paper_preview_body')
-                ], id="paper_preview", size="lg"),
-                dbc.CardBody(id='column_description_relation', children='', style={'background-color': 'lightgray'})
-            ]
-        )
-        )
-    ), width=10)
+    dbc.Col(
+        dbc.Card(
+            dbc.CardBody(
+                dcc.Loading(
+                    type = "default",
+                    children = [
+                        relation_chart,
+                        dbc.Modal([
+                        dbc.ModalHeader(id='paper_preview_title'),
+                        dbc.ModalBody(className="modal-content-fullscreen", id='paper_preview_body')
+                        ], id="paper_preview", size="lg"),
+                        dbc.CardBody(
+                            id='column_description_relation',
+                            children='',
+                            style={'background-color': 'lightgray'}
+                        )
+                    ]
+                )
+            ),
+            style={
+                'margin': '10px', 
+                'box-shadow': 'rgba(0,0,0,0.35) 0px 5px 5px'
+            }
+        ),
+        width=10
+    )
 ]
 
 # define relation_callback
-def relation_callback(app):
+def relation_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
+    """
+    This function creates the callback for the Relation Tab.
+    Parameters:
+    - app: Dash => The App instance
+    - cache: Cache => the cache of the Application
+    - cache_timeout: int = 600 => The timeout before clearing the cache
+    """
     @app.callback(
         Output("relation_network", "data"),
         Output("column_description_relation", "children"),
@@ -128,11 +152,14 @@ def relation_callback(app):
         Input("relation_dropdown", "value"),
         Input("relation_limit_slider", "value")
     )
+    @cache.memoize(timeout=cache_timeout)
     def draw_relation_network(attribute: str, table: str, limit: int):
         if attribute is None or table is None or limit is None:
             return dash.no_update, dash.no_update
 
-        return generate_network_relations(attribute, table, limit), get_column_description(attribute)
+        network_relations: dict = generate_network_relations(attribute, table, limit)
+        column_descriptions: str = get_column_description(attribute)
+        return network_relations, column_descriptions
 
     @app.callback(
         Output("paper_preview", "is_open"),
@@ -152,9 +179,16 @@ def relation_callback(app):
             return not is_open , dash.no_update, dash.no_update
 
         # get data from database
-        date_title: list[tuple] = paper_date_title(nodes[0])
-        authors: list[str] = [author[0] for author in paper_authors(nodes[0])]
-        schools: list[str] = [school[0] for school in paper_schools(nodes[0])]
+        date_title_query = paper_date_title_query(nodes[0])
+        date_title: list[tuple] = execute_query(date_title_query, 'paper_date_title_query')
+
+        authors_query = paper_authors_query(nodes[0])
+        authors: list[str] = [author[0] for author in execute_query(authors_query, 'paper_authors_query')]
+
+        schools_query = paper_schools_query(nodes[0])
+        schools: list[str] = [
+            school[0] for school in execute_query(schools_query, 'paper_schools_query')
+        ]
 
         return not is_open, dbc.Row([
             dbc.Label(f'Date: {date_title[0][0]}'),

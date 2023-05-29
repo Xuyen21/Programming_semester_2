@@ -8,6 +8,7 @@ pyvenv.cfg
 .venv/
 __pycache__/
 .idea/
+.cache/
 
 # Files
 *.xml

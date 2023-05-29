@@ -1,36 +1,26 @@
-import os
-from dotenv import load_dotenv
-# load environments from .env file
-load_dotenv()
-
-# not working in VSCODE without that
-if os.getenv('VSCODE') == "True":
-    import sys
-    sys.path.append('./')
-
+"""
+This module is responsible for the timespan tab of the DBLP Dashboard.
+"""
 import plotly.express as px
-
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, Dash
 import dash_bootstrap_components as dbc
+import pandas as pd
+from flask_caching import Cache
 
-from app.components.filter_card import generate_filter_card
-from app.components.settings_card import generate_settings_card
-from app.components.info_card import info_card
+# modules
+from modules.postgres import execute_query
+from modules.postgres_queries import papers_per_year_query
 
-from app.modules.postgres import update_year_dropdown, papers_per_month
+# components
+from components.filter_card import generate_filter_card
+from components.settings_card import generate_settings_card
+from components.info_card import info_card
 
 # Define form
 timespan_form = html.Div([
     dbc.Row([
-        dbc.Label("Table"),
-        dcc.Dropdown(
-            options=update_year_dropdown(),
-            placeholder="Choose the year",
-            id="year_dropdown",
-            value ="2022"
-        )
+        html.P("No Filter available")
     ])
-
 ])
 
 # Define timespan_chart
@@ -57,34 +47,53 @@ timespan_children = [
     ])),
         info_card
     ], width=2),
-    dbc.Col(dbc.Card(
-        dbc.CardBody(dcc.Loading(
-            type="default",
-            children=timespan_chart))
-    ), width=10)
+    dbc.Col(
+        dbc.Card(
+            dbc.CardBody(
+                dcc.Loading(
+                    type="default",
+                    children=timespan_chart
+                )
+            ),
+            style={
+                'margin': '10px', 
+                'box-shadow': 'rgba(0,0,0,0.35) 0px 5px 5px'
+            }
+        ),
+        width=10
+    )
 ]
 
 # define timespan_callbackcallback
-def timespan_callback(app):
+def timespan_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
+
+    # define sql request
+    @cache.memoize(timeout=cache_timeout)
+    def papers_per_year() -> pd.DataFrame:
+        sql_query = papers_per_year_query()
+
+        results = execute_query(sql_query, 'papers_per_year')
+        df_papers = pd.DataFrame(results, columns=['entry_key', 'entryType', 'year'])
+
+        return df_papers
+
     @app.callback(
         Output("timespan_chart", "figure"),
-        Input("year_dropdown", "value"),
         Input("chart_type_dropdown", "value")
     )
-    def draw_timespan(selected_year: str, chart_type: str):
-        if not selected_year:
-            selected_year = "2022"
+    @cache.memoize(timeout=cache_timeout)
+    def draw_timespan(chart_type: str):
+        df_papers = papers_per_year()
+        grouped_df = df_papers.groupby(['year', 'entryType']).size().reset_index(name='count')
 
-        df = papers_per_month(selected_year)
-
-        if chart_type == "bar":
-            fig = px.bar(df, x='month', y='count', color='entryType')
-        elif chart_type == "pie":
-            fig = px.pie(df, values='count', names='entryType',color='entryType')
+        if chart_type == "pie":
+            fig = px.pie(grouped_df, values='count', names='entryType', title='Publications over the years', color='entryType')
+        else:
+            fig = px.bar(grouped_df, x='year', y='count', color='entryType')
 
         fig.update_layout(
-            xaxis_title="Month",
-            yaxis_title="Number of publications",
+            xaxis_title="Year",
+            yaxis_title="Number of Publications",
         )
 
         return fig

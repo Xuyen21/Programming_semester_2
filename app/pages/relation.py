@@ -179,19 +179,22 @@ def relation_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
             return not is_open , dash.no_update, dash.no_update
 
         # get data from database
-        date_title_query = paper_date_title_query(nodes[0])
-        date_title: list[tuple] = execute_query(date_title_query, 'paper_date_title_query')
+        try:
+            date_title_query = paper_date_title_query(nodes[0])
+            date_title: list[tuple] = execute_query(date_title_query, 'paper_date_title_query')
 
-        authors_query = paper_authors_query(nodes[0])
-        authors: list[str] = [author[0] for author in execute_query(authors_query, 'paper_authors_query')]
+            authors_query = paper_authors_query(nodes[0])
+            authors: list[str] = [author[0] for author in execute_query(authors_query, 'paper_authors_query')]
 
-        schools_query = paper_schools_query(nodes[0])
-        schools: list[str] = [
-            school[0] for school in execute_query(schools_query, 'paper_schools_query')
-        ]
+            schools_query = paper_schools_query(nodes[0])
+            schools: list[str] = [
+                school[0] for school in execute_query(schools_query, 'paper_schools_query')
+            ]
 
-        return not is_open, dbc.Row([
-            dbc.Label(f'Date: {date_title[0][0]}'),
-            dbc.Label(f'Authors: {", ".join(authors)}'),
-            dbc.Label(f'Schools: {", ".join(schools)}'),
-        ]), dbc.Label(date_title[0][1])
+            return not is_open, dbc.Row([
+                dbc.Label(f'Date: {date_title[0][0]}'),
+                dbc.Label(f'Authors: {", ".join(authors)}'),
+                dbc.Label(f'Schools: {", ".join(schools)}'),
+            ]), dbc.Label(date_title[0][1])
+        except IndexError:
+            return dash.no_update, dash.no_update, dash.no_update

@@ -78,18 +78,21 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
         df_aggreg = pd.DataFrame(values, columns=selected_columns)
         df_aggreg = df_aggreg.sort_values(by=[count], ascending=True)
 
-        chart_title = f'The top {data_limit} {selected_table}'
-        bar_chart = px.bar(df_aggreg, x=name, y=count, title=chart_title)
-        pie_chart = px.pie(
-            values=df_aggreg.iloc[:, 1],
-            names=df_aggreg.iloc[:, 0],
-            title=chart_title
-        )
+        try:
+            chart_title = f'The top {data_limit} {selected_table}'
+            bar_chart = px.bar(df_aggreg, x=name, y=count, title=chart_title)
+            pie_chart = px.pie(
+                values=df_aggreg.iloc[:, 1],
+                names=df_aggreg.iloc[:, 0],
+                title=chart_title
+            )
 
-        if chart_type == 'bar chart':
+            if chart_type == 'pie chart':
+                return pie_chart, content
+
             return bar_chart, content
-        if chart_type == 'pie chart':
-            return pie_chart, content
+        except ValueError:
+            return dash.no_update, dash.no_update
 
     # user click on the blue button, a modal of word_clouds image will be shown
     @app.callback(

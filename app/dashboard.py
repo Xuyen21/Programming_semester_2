@@ -49,13 +49,12 @@ cache = Cache(app.server, config={
 })
 
 app.layout = html.Div(
-        className="app-div",
-        children=[
-            app_layout,
-            dbc.Row(id="content")
-        ]
-
-    )
+    className="app-div",
+    children=[
+        app_layout,
+        dbc.Row(id="content")
+    ]
+)
 
 # tab callback
 @app.callback(

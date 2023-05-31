@@ -1,3 +1,8 @@
+"""
+This module is responsible for the aggregation tab of the DBLP Dashboard.
+
+Created by: Xuyen Furmanczuk
+"""
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 
@@ -73,7 +78,14 @@ aggregation_children = dcc.Tab(label="Aggregation", children=[
                 dbc.CardBody(
                     dcc.Loading(
                         type="default",
-                        children=[aggregation_chart, dbc.CardBody(id='column_description_aggregation', children='', style={'background-color': 'lightgray'})]
+                        children=[
+                            aggregation_chart,
+                            dbc.CardBody(
+                                id='column_description_aggregation',
+                                children='',
+                            style={'background-color': 'lightgray'}
+                            )
+                        ]
                     )
                 ),
                 style={

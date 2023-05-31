@@ -1,3 +1,8 @@
+"""
+This module is responsible for the rendering of the aggregation tab.
+
+Created by: Xuyen Furmanczuk
+"""
 import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, State, dash_table, dash
@@ -16,7 +21,8 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
 
     # define sql request
     @cache.memoize(timeout=cache_timeout)
-    def aggregate_column(select: list[str], table: str, group_by: str, order_by: str, order: bool = False, limit: int = 10) -> list[tuple]:
+    def aggregate_column(select: list[str], table: str, group_by: str, order_by: str,
+        order: bool = False, limit: int = 10) -> list[tuple]:
         """
         This function gets the parameters provided by the dashboard, converts it to a sql query
         and returns the result as a list of tuples.
@@ -48,7 +54,8 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
     )
     @cache.memoize(timeout=cache_timeout)
     # set author, and bar chart as default
-    def draw_aggregation(selected_table: str='author', chart_type: str='bar chart', popularity_slider=10):
+    def draw_aggregation(selected_table: str='author', chart_type: str='bar chart',
+        popularity_slider=10):
         # set data limit according to the slider in settings
         data_limit = popularity_slider
 
@@ -73,7 +80,11 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
 
         chart_title = f'The top {data_limit} {selected_table}'
         bar_chart = px.bar(df_aggreg, x=name, y=count, title=chart_title)
-        pie_chart = px.pie(values=df_aggreg.iloc[:, 1], names=df_aggreg.iloc[:, 0], title=chart_title)
+        pie_chart = px.pie(
+            values=df_aggreg.iloc[:, 1],
+            names=df_aggreg.iloc[:, 0],
+            title=chart_title
+        )
 
         if chart_type == 'bar chart':
             return bar_chart, content
@@ -114,11 +125,11 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
         """
 
         Args:
-            click_data: get the value from the point where user clicked on
+            click_data: get the value the user clicked on
             close_click: check if user clicked on a close button
             is_open:  check if user clicked on a  certain point of the graph
 
-        Returns: 10 latest publications of that author/school.. which contains year, title and the url
+        Returns: 10 latest publications of the selection which contains year, title and the url
 
         """
         if click_data is None:

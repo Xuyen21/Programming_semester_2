@@ -184,7 +184,9 @@ def relation_callback(app: Dash, cache: Cache, cache_timeout: int = 600):
             date_title: list[tuple] = execute_query(date_title_query, 'paper_date_title_query')
 
             authors_query = paper_authors_query(nodes[0])
-            authors: list[str] = [author[0] for author in execute_query(authors_query, 'paper_authors_query')]
+            authors: list[str] = [
+                author[0] for author in execute_query(authors_query, 'paper_authors_query')
+            ]
 
             schools_query = paper_schools_query(nodes[0])
             schools: list[str] = [

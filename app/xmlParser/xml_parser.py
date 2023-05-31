@@ -86,7 +86,11 @@ def elements(queue_sql: Queue, element) -> None:
             )
 
             insert_entry_child = sql.SQL(
-                'INSERT INTO {table} ({column}, entry_key) VALUES ((SELECT id FROM {table2} WHERE name = {text}), {key});'
+                """
+                INSERT INTO {table} ({column}, entry_key) 
+                VALUES ((SELECT id FROM {table2} 
+                WHERE name = {text}), {key});
+                """
                 ).format(
                 table = sql.Identifier('entry_' + tag),
                 column = sql.Identifier(tag + '_id'),

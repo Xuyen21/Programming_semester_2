@@ -82,4 +82,4 @@ if __name__ == '__main__':
     # app.run(debug=False)
 
     # start app (comment when in development)
-    serve(app.server, host="0.0.0.0", port=8050)
+    serve(app.server, host="127.0.0.1", port=8050)

@@ -1,7 +1,7 @@
 """
 This module provides descriptions for the various Database Columns.
 Created by: Silvan Wiedmer
-Crated at: 24.05.2023
+Created at: 24.05.2023
 """
 column_description: dict = {
     "author": """
@@ -30,5 +30,5 @@ def get_column_description(column_name: str = 'author') -> str:
     """
     return column_description.get(
         column_name,
-        "We were not able to load the according column description."
+        "We were unable to load the column description."
     )

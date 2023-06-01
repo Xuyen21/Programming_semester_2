@@ -6,7 +6,8 @@ Created at: 25.05.2023
 from psycopg2 import sql
 
 # Aggregation
-def aggregate_column_query(select: list[str], table: str, group_by: str, order_by: str, order: bool = False, limit: int = 10) -> sql.Composed:
+def aggregate_column_query(select: list[str], table: str, group_by: str, order_by: str,
+    order: bool = False, limit: int = 10) -> sql.Composed:
     """
     This function generate the query for aggregate_column
     Parameters:

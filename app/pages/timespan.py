@@ -1,5 +1,7 @@
 """
 This module is responsible for the timespan tab of the DBLP Dashboard.
+
+Created by: Karolina Thöny-Tyganova
 """
 import plotly.express as px
 from dash import dcc, html, Input, Output, Dash

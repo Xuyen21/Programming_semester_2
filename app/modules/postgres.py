@@ -6,8 +6,7 @@ Created: 3.3.2023
 import os
 import logging
 from time import time
-from psycopg2 import connect, errors, sql
-import pandas as pd
+from psycopg2 import connect, errors
 from dotenv import load_dotenv
 
 # load environments from .env file

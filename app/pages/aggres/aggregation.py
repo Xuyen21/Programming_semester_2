@@ -33,7 +33,7 @@ aggregation_form = html.Div([
                 ], className="modal-content-fullscreen")
             ], id="modal", size="xl"),
         ]),
-        # modal for data-table after user clicked on graph
+        # modal for data-table after the user clicked on graph
         html.Div([
             dbc.Modal([
                 dbc.ModalHeader(html.H5(id='data_table')),
@@ -54,7 +54,7 @@ setting = html.Div([
     dbc.Row([
         dbc.Label('Top popularity'),
         dcc.Slider(5, 20, 5, value=10, id='top_popularity_slider'),
-        # allow user to slide the popularity range, default value is top 10
+        # allow the user to slide the popularity range, default value is top 10
         dbc.Label('Chart Type'),
         dcc.Dropdown(
             ['bar chart', 'pie chart'],

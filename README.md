@@ -37,8 +37,8 @@ following environment variables.
 
 ```env
 VSCODE = "True"
-WORKSPACE_FOLDER=Your path to the app folder
-PYTHONPATH=./app
+WORKSPACE_FOLDER = Your path to the app folder
+PYTHONPATH = ./app
 ```
 
 ## Run the Dashboard

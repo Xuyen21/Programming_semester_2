@@ -1,5 +1,5 @@
 """
-This it the main Python file of the DBLP Dashboard.
+This is the main Python file of the DBLP Dashboard.
 It creates the Dash instance and loads all the required resources.
 """
 import logging
@@ -7,6 +7,7 @@ from dash import dcc, Dash, html, Input, Output
 import dash_bootstrap_components as dbc
 from dash_bootstrap_components.themes import BOOTSTRAP
 
+from waitress import serve
 from flask_caching import Cache
 
 from pages.aggres.aggregation import aggregation_children, aggregation_tab
@@ -18,7 +19,7 @@ from pages.timespan import timespan_tab, timespan_children, timespan_callback
 # https://stackoverflow.com/questions/73882299/python-logging-messages-not-showing-up-due-to-imports
 logging.basicConfig(
     format='%(levelname)s : [%(filename)s:%(lineno)d] : %(message)s',
-    level=logging.ERROR,
+    level=logging.INFO,
     force=True # needed due to override of logging.debug
 )
 logging.getLogger(__name__)
@@ -77,5 +78,8 @@ if __name__ == '__main__':
     relation_callback(app, cache, 3600)
     timespan_callback(app, cache, 3600)
 
-    # start app
-    app.run(debug=False)
+    # start app (Only for development)
+    # app.run(debug=False)
+
+    # start app (comment when in development)
+    serve(app.server, host="127.0.0.1", port=8050)

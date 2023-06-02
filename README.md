@@ -54,3 +54,8 @@ When running under VSCODE make sure you run it from within the `app` folder.
 ## Version control using git
 
 Changes are versioned with git and each new feature is introduced through a GitHub pull request.
+
+## Known issues
+
+When switching tabs or filters before the chart is properly
+loaded, it is possible to run into a state, where an empty chart has been cached. In this case, please delete the content of the `.cache` folder and restart the dashboard.

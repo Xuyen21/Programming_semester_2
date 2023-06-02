@@ -32,7 +32,7 @@ To connect to the Postgres Database, you need a few environment variables.
 
 ```env
 DATABASE_NAME = The name of your database
-POSTGRES_USER = The username of your database
+POSTGRES_USER = The username of your database (Default: postgres)
 POSTGRES_PASSWORD = The password for the specified user
 ```
 

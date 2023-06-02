@@ -3,9 +3,11 @@ This module is responsible for the rendering of the aggregation tab.
 
 Created by: Xuyen Furmanczuk
 """
+import logging
 import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, State, dash_table, dash
+from dash.exceptions import PreventUpdate
 from flask_caching import Cache
 
 # modules
@@ -39,7 +41,13 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
 
         sql_query = aggregate_column_query(select, table, group_by, order_by, order, limit)
 
-        return execute_query(sql_query, 'aggregation_chart')
+        result = execute_query(sql_query, 'aggregation_chart')
+
+        # check if array empty
+        if not result:
+            raise ValueError
+
+        return result
 
     @app.callback(
         [
@@ -63,13 +71,18 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
 
         selected_columns: list[str] = [f'{selected_table}.name', 'sub_col.count']
 
-        values = aggregate_column(
-            selected_columns,
-            selected_table,
-            "name",
-            f'COUNT({selected_table}_{"id"})',
-            limit=data_limit
-        )
+        # ensure non empty response
+        try:
+            values = aggregate_column(
+                selected_columns,
+                selected_table,
+                "name",
+                f'COUNT({selected_table}_{"id"})',
+                limit=data_limit
+            )
+        except ValueError as error:
+            logging.error("Empty data for %s", selected_table)
+            raise PreventUpdate from error
 
         selected_columns: list[str] = [f'{selected_table}', 'count']
         name = selected_columns[0]
@@ -91,8 +104,9 @@ def aggres_render(app: Dash, cache: Cache, cache_timeout: int = 600):
                 return pie_chart, content
 
             return bar_chart, content
-        except ValueError:
-            return dash.no_update, dash.no_update
+        except ValueError as error:
+            logging.error("Empty Chart for %s", selected_table)
+            raise PreventUpdate from error
 
     # user click on the blue button, a modal of word_clouds image will be shown
     @app.callback(

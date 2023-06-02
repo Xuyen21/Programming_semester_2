@@ -57,5 +57,4 @@ Changes are versioned with git and each new feature is introduced through a GitH
 
 ## Known issues
 
-When switching tabs or filters before the chart is properly
-loaded, it is possible to run into a state, where an empty chart has been cached. In this case, please delete the content of the `.cache` folder and restart the dashboard.
+When switching tabs or filters before the chart is properly loaded, it is possible to run into a state, where an empty chart gets displayed. In this case, try to change the filter. If that doesn't help please delete the content of the `.cache` folder and restart the dashboard.
